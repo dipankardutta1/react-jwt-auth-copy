@@ -41,7 +41,7 @@ class App extends Component {
             {
                 label: 'Home',
                 icon: 'pi pi-fw pi-power-off',
-                url:'/home' // ok
+                url:'/home' // this
                 
             }
         ]
