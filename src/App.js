@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Switch , Route, Link } from "react-router-dom";
+import React, { Component,useState } from "react";
+import { Switch , Route, Link,BrowserRouter as Router } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
@@ -14,32 +14,119 @@ import BoardAdmin from "./components/board-admin.component";
 import AuthVerify from "./common/auth-verify";
 import EventBus from "./common/EventBus";
 
+import CreateUserComponent from "./components/users/create-user.component";
+
+import { Menubar } from 'primereact/menubar';
+import { InputText } from 'primereact/inputtext';
+
 class App extends Component {
+
+
+  
+
   constructor(props) {
     super(props);
+
+    
+   
+
+
+
     this.logOut = this.logOut.bind(this);
 
     this.state = {
-      showAdminBoard: false,
       currentUser: undefined,
+      showCreateUser : false, // new added
+      items : [
+            {
+                label: 'Home',
+                icon: 'pi pi-fw pi-power-off',
+                url:'/home'
+            }
+        ]
     };
   }
 
   componentDidMount() {
     const user = AuthService.getCurrentUser();
 
-   // alert("ok " + user);
+    //
+    
     
     if (user) {
+
+        // logic for Menu 
+        let menus = this.state.items;
+        if(user.permissions.includes("CREATE_USER")){
+            menus.push({
+                label: 'Create User',
+                icon: 'pi pi-fw pi-power-off',
+                url:'/createUser'
+            });
+        }
+
+        
+       
+        if(user){
+            menus.push({
+                label: 'User',
+                icon: 'pi pi-fw pi-power-off',
+                url:'/user'
+            },
+            {
+                label: 'Profile',
+                icon: 'pi pi-fw pi-power-off',
+                url:'/Profile'
+            },
+            {
+                label: 'LogOut',
+                icon: 'pi pi-fw pi-power-off',
+                url:'/login',
+                command:()=>{ this.logOut()}
+            });
+        }
+
+       
+        // logic for menu end
+     
       this.setState({
         currentUser: user,
-        showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+        showCreateUser: user.permissions.includes("CREATE_USER"), // new added
+        items: menus
       });
+
+
+    }else{
+        let menus = this.state.items;
+        menus.push({
+            label: 'Sign Up',
+            icon: 'pi pi-fw pi-power-off',
+            url:'/register'
+           
+        },
+        {
+            label: 'Login',
+            icon: 'pi pi-fw pi-power-off',
+            url:'/login'
+           
+        });
+
+        this.setState({
+            currentUser: undefined,
+            showCreateUser: false, // new added
+            items: menus
+          });
+
     }
 
     EventBus.on("logout", () => {
       this.logOut();
     });
+
+
+     
+
+
   }
 
   componentWillUnmount() {
@@ -49,75 +136,39 @@ class App extends Component {
   logOut() {
     AuthService.logout();
     this.setState({
-      showAdminBoard: false,
       currentUser: undefined,
+      showCreateUser:false, // new added
+      items: [
+        {
+            label: 'Home',
+            icon: 'pi pi-fw pi-power-off',
+            url:'/home'
+        },
+        {
+            label: 'Sign Up',
+            icon: 'pi pi-fw pi-power-off',
+            url:'/register'
+           
+        },
+        {
+            label: 'Login',
+            icon: 'pi pi-fw pi-power-off',
+            url:'/login'
+           
+        }
+    ]
     });
   }
 
   render() {
-    const { currentUser, showAdminBoard } = this.state;
+    const start = <img alt="logo" src="showcase/images/logo.png" onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} height="40" className="mr-2"></img>;
+    const end = <InputText placeholder="Search" type="text" />;
 
     return (
       <div>
-        <nav className="navbar navbar-expand navbar-dark bg-dark">
-          <Link to={"/"} className="navbar-brand">
-           Genuine Hire
-          </Link>
-          <div className="navbar-nav mr-auto">
-            <li className="nav-item">
-              <Link to={"/home"} className="nav-link">
-                Home
-              </Link>
-            </li>
-
-            
-
-            {showAdminBoard && (
-              <li className="nav-item">
-                <Link to={"/admin"} className="nav-link">
-                  Admin Board
-                </Link>
-              </li>
-            )}
-
-            {currentUser && (
-              <li className="nav-item">
-                <Link to={"/user"} className="nav-link">
-                  User
-                </Link>
-              </li>
-            )}
-          </div>
-
-          {currentUser ? (
-            <div className="navbar-nav ml-auto">
-              <li className="nav-item">
-                <Link to={"/profile"} className="nav-link">
-                  {currentUser.email}
-                </Link>
-              </li>
-              <li className="nav-item">
-                <a href="/login" className="nav-link" onClick={this.logOut}>
-                  LogOut
-                </a>
-              </li>
-            </div>
-          ) : (
-            <div className="navbar-nav ml-auto">
-              <li className="nav-item">
-                <Link to={"/login"} className="nav-link">
-                  Login
-                </Link>
-              </li>
-
-              <li className="nav-item">
-                <Link to={"/register"} className="nav-link">
-                  Sign Up
-                </Link>
-              </li>
-            </div>
-          )}
-        </nav>
+        <div className="card">
+            <Menubar model={this.state.items} start={start} />
+        </div>
 
         <div className="container mt-3">
           <Switch>
@@ -127,6 +178,7 @@ class App extends Component {
             <Route exact path="/profile" component={Profile} />
             <Route path="/user" component={BoardUser} />
             <Route path="/admin" component={BoardAdmin} />
+            <Route path="/createUser" component={CreateUserComponent} />
           </Switch>
         </div>
 
