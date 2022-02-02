@@ -7,6 +7,7 @@ import authService from "../../services/auth.service";
 export default class CreateUserComponent extends Component {
   constructor(props) {
     super(props);
+    
 
     this.state = {
       showContent: false
@@ -57,21 +58,14 @@ export default class CreateUserComponent extends Component {
   render() {
     if(this.state.showContent){
       return (
-        
-        <div className="container">
-          <header className="jumbotron">
-
-            <h3>Hello </h3>
-          </header>
+        <div>
+          
         </div>
-        
-      );
+        );
     }else{
       return (
-        
         <div className="container">
           <header className="jumbotron">
-
             <h3>Not Authorized to access this page</h3>
           </header>
         </div>
