@@ -17,32 +17,33 @@ import authService from '../../services/auth.service';
 
   constructor(props) {
     super(props);
-  
-   this.desiganationTypesChange = this.desiganationTypesChange.bind(this);
+
    this.save=this.save.bind(this);
    this.onRolesChange=this.onRolesChange.bind(this);
-   //this.onCityChange = this.onCityChange.bind(this);
+   
    this.state = {
     showContent: false,
     desiganationType: null,
-    desiganationTypeValue:null,
     roles:[],
-    cities: []
+    name:'',
+    email:'',
+    contactNumber:'',
+    location:'',
+    roleList :[]
    
     };
    
-    this.desiganationTypes = [
-      { name: 'HR',code: 'HR'},
-      { name: 'Accountant',code: 'ACC' },
-      { name: 'User',code: 'USER'},
-      { name: 'Admin',code: 'ADMIN'},
-      { name: 'Reviewer',code: 'reviewer'},
-  ];
+    this.desiganationTypes = ['HR','Accountant','User','Admin','Reviewer'];
+      
   
   }//end
 
 
   componentDidMount() { // New Method added By Dipankar
+
+    
+
+   
 
     const user = authService.getCurrentUser();
 
@@ -51,17 +52,34 @@ import authService from '../../services/auth.service';
       this.setState({
         showContent: true,
         desiganationType: null,
-        desiganationTypeValue:null,
         roles:[],
-        cities: []
+        name:'',
+        email:'',
+        contactNumber:'',
+        location:''
+       
         });
+
+        authService.getRoles().then((response) => {
+            //alert(JSON.stringify(response.data));
+            this.setState({roleList: response.data});
+         },
+         error => {
+             
+         }
+       );
+
+
     }else{
       this.setState({
         showContent: false,
         desiganationType: null,
-        desiganationTypeValue:null,
         roles:[],
-        cities: []
+        name:'',
+        email:'',
+        contactNumber:'',
+        location:'',
+        roleList:[]
         });
     }
 
@@ -79,27 +97,10 @@ import authService from '../../services/auth.service';
     this.setState({ roles: selectedRoles });
 
 }
-  desiganationTypesChange(e) {
-  
-    this.setState({ 
-        desiganationType: e.value,
-        desiganationTypeValue:e.value.code
-    });
-   
-}
 
-/* onCityChange(e) {
-    let selectedCities = [...this.state.cities];
 
-    if (e.checked)
-        selectedCities.push(e.value);
-    else
-        selectedCities.splice(selectedCities.indexOf(e.value), 1);
-
-    this.setState({ cities: selectedCities });
-} */
 save(){
-    alert(this.state.roles);
+    alert(JSON.stringify(this.state));
    
 }
   render() {
@@ -123,55 +124,60 @@ save(){
         <div class="field grid">
             <label for="name" class="col-12 mb-2 md:col-2 md:mb-0"> Name</label>
             <div class="col-12 md:col-10">
-                <input id="name" type="text" value="Stacy Taylor"class="inputfield w-full"></input>
+                <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
             </div>
         </div>
         <div class="field grid">
             <label for="email" class="col-12 mb-2 md:col-2 md:mb-0">Email</label>
             <div class="col-12 md:col-10">
-                <input id="email" type="text" value="stacy@intello.com" class="inputfield w-full"></input>
+                <InputText value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} />
             </div>
         </div>
         <div class="field grid">
             <label for="contactNumber" class="col-12 mb-2 md:col-2 md:mb-0">Contact Number</label>
             <div class="col-12 md:col-10">
-                <input id="contactNumber" type="text" value="033888666" class="inputfield w-full"></input>
+                <InputText value={this.state.contactNumber} onChange={(e) => this.setState({contactNumber: e.target.value})} />
             </div>
         </div><div class="field grid">
             <label for="location" class="col-12 mb-2 md:col-2 md:mb-0">Location</label>
             <div class="col-12 md:col-10">
-                <input id="location" type="text" value="Texus" class="inputfield w-full"></input>
+                <InputText value={this.state.location} onChange={(e) => this.setState({location: e.target.value})} />
             </div>
         </div>
         
         <div class="field grid">
             <label for="desiganation" class="col-12 mb-2 md:col-2 md:mb-0">Desiganation</label>
             <div class="col-12 md:col-2">
-            <Dropdown id="desiganation" value={this.state.desiganationType} options={this.desiganationTypes} onChange={this.desiganationTypesChange} optionLabel="name" placeholder="Select Desiganation Type" />
+            <Dropdown id="desiganation" value={this.state.desiganationType} options={this.desiganationTypes} onChange={(e) => this.setState({desiganationType: e.target.value})} placeholder="Select Desiganation Type" />
             </div>
         </div>
+        
         <div class="field grid">
             <label for="roles" class="col-12 mb-2 md:col-2 md:mb-0">Roles</label>
             <div class="col-12 md:col-10">
             <div class="grid">
+            {this.state.roleList.map((object) => (    
             <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role1" name="role" value="Admin" onChange={this.onRolesChange} checked={this.state.roles.indexOf('Admin') !== -1} />
-                   <label htmlFor="role1">Admin</label>
+                   <Checkbox inputId="role1" name="role" value="{object}" onChange={this.onRolesChange} checked={this.state.roles.indexOf({object}) !== -1} />
+                   <label htmlFor="role1">{object}</label>
             </div>
             </div>  
+            ))}
+            {/*}
             <div class="col-4">
             <div className="field-checkbox">
                    <Checkbox inputId="role2" name="role" value="User" onChange={this.onRolesChange} checked={this.state.roles.indexOf('User') !== -1} />
                    <label htmlFor="role2">User</label>
              </div>
-          </div>  
+            </div>  
             <div class="col-4">
             <div className="field-checkbox">
                    <Checkbox inputId="role3" name="role" value="Reviewer" onChange={this.onRolesChange} checked={this.state.roles.indexOf('Reviewer') !== -1} />
                    <label htmlFor="role3">Reviewer</label>
              </div>
           </div>
+            {*/}
             </div>
            </div>
         </div>

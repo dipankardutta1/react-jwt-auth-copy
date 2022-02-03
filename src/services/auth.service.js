@@ -43,6 +43,10 @@ class AuthService {
     });
   }
 
+  getRoles() {
+    return axios.post(API_URL + "/api/auth/getRoles");
+  }
+
   getCurrentUser() {
     return JSON.parse(localStorage.getItem('user'));;
   }
