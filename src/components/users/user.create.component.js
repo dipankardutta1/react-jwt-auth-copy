@@ -19,7 +19,8 @@ import authService from '../../services/auth.service';
     super(props);
 
    this.save=this.save.bind(this);
-   this.onRolesChange=this.onRolesChange.bind(this);
+   this.reset=this.reset.bind(this);
+   //this.onRolesChange=this.onRolesChange.bind(this);
    
    this.state = {
     showContent: false,
@@ -29,21 +30,18 @@ import authService from '../../services/auth.service';
     email:'',
     contactNumber:'',
     location:'',
-    roleList :[]
+    checked: false,
+    selectedRoles:[]
    
     };
    
     this.desiganationTypes = ['HR','Accountant','User','Admin','Reviewer'];
-      
+    this.onCategoryChange = this.onCategoryChange.bind(this);
   
   }//end
 
 
   componentDidMount() { // New Method added By Dipankar
-
-    
-
-   
 
     const user = authService.getCurrentUser();
 
@@ -56,13 +54,23 @@ import authService from '../../services/auth.service';
         name:'',
         email:'',
         contactNumber:'',
-        location:''
-       
+        location:'',
+        checked:false,
+        selectedRoles:[]
         });
 
         authService.getRoles().then((response) => {
             //alert(JSON.stringify(response.data));
-            this.setState({roleList: response.data});
+            //alert(response.data);
+            const rolesList=[];
+            for(let i = 0; i < response.data.length; i++) {
+              rolesList.push(response.data[i]);
+            }
+            
+            this.setState({
+              roles:[...rolesList]
+            });
+            
          },
          error => {
              
@@ -75,33 +83,77 @@ import authService from '../../services/auth.service';
         showContent: false,
         desiganationType: null,
         roles:[],
+        selectedRoles:[],
         name:'',
         email:'',
         contactNumber:'',
         location:'',
-        roleList:[]
+        checked:false
         });
     }
 
     
   }
 
+  onCategoryChange(e) {
+    let selectedRoles = [...this.state.selectedRoles];
 
-  
-   onRolesChange = (e) => {
-    let selectedRoles = [...this.state.roles];
-    if (e.checked)
-    selectedRoles.push(e.value);
-    else
-    selectedRoles.splice(selectedRoles.indexOf(e.value), 1);
-    this.setState({ roles: selectedRoles });
+    if (e.checked) {
+      selectedRoles.push(e.value);
+    }
+    else {
+        for (let i = 0; i < selectedRoles.length; i++) {
+            const selectedCategory = selectedRoles[i];
 
+            if (selectedCategory === e.value) {
+              selectedRoles.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    this.setState({ selectedRoles });
 }
 
-
+  
+   /* onRolesChange = (e) => {
+   
+    let roles = [...this.state.roles];
+    if (e.checked) {
+      roles.push(e.value);
+  }
+  else {
+   
+      for (let i = 0; i < roles.length; i++) {
+          const role = roles[i];
+          if (role.key === e.value) {
+            roles.splice(i, 1);
+              break;
+          }
+      }
+  }
+  this.setState({
+    selectedRoles:[...this.state.roles]
+  });
+        
+      } */
+    
 save(){
     alert(JSON.stringify(this.state));
    
+}
+reset(){
+  this.setState({
+    desiganationType: null,
+    
+    name:'',
+    email:'',
+    contactNumber:'',
+    location:'',
+    checked: false,
+    selectedRoles:[],
+    });
+    
 }
   render() {
     if(!this.state.showContent){
@@ -156,15 +208,36 @@ save(){
             <label for="roles" class="col-12 mb-2 md:col-2 md:mb-0">Roles</label>
             <div class="col-12 md:col-10">
             <div class="grid">
-            {this.state.roleList.map((object) => (    
+            {/* {this.state.roles.map((object) => (    
             <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role1" name="role" value="{object}" onChange={this.onRolesChange} checked={this.state.roles.indexOf({object}) !== -1} />
+                   <Checkbox inputId="role1" name="role" value={object} onChange={this.onRolesChange} checked={this.state.roles.indexOf({object}) !== -1} />
                    <label htmlFor="role1">{object}</label>
             </div>
             </div>  
-            ))}
-            {/*}
+            ))} */}{/* {
+            this.state.roles.map((role) => {
+                            return (
+                                <div  key={role.key} className="field-checkbox">
+                                    <Checkbox inputId={role.key} name="role" value={role.name} onChange={this.onRolesChange} checked={this.state.roles.some((item) => item.key === role.key)}  />
+                                    <label htmlFor={role.key}>{role.key}</label>
+                                </div>
+                            )
+                        })
+                      } */}
+                      
+                      {
+                        this.state.roles.map((category) => {
+                            return (
+                                <div key={category} className="field-checkbox">
+                                    <Checkbox inputId={category} name="category" value={category} onChange={this.onCategoryChange} checked={this.state.selectedRoles.some((item) => item === category)}  />
+                                    <label htmlFor={category}>{category}</label>&nbsp;&nbsp;
+                                </div>
+                            )
+                        })
+                    }
+                      
+                      {/*}
             <div class="col-4">
             <div className="field-checkbox">
                    <Checkbox inputId="role2" name="role" value="User" onChange={this.onRolesChange} checked={this.state.roles.indexOf('User') !== -1} />
@@ -185,7 +258,7 @@ save(){
             <div class="col-12 md:col-10 col-offset-6">
             <Button label="submit" icon="pi pi-user" onClick={this.save} className="p-button-raised p-button-rounded"/>
             &nbsp; &nbsp; 
-            <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+            <Button label="Reset" icon="pi pi-user" onClick={this.reset}className="p-button-raised p-button-rounded"/>
            
             </div>
         </div>
@@ -195,6 +268,7 @@ save(){
         </div>
     </div>
             </Panel>
+                    
       </div>
     );
     }
