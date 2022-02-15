@@ -12,26 +12,30 @@ import { Dropdown } from 'primereact/dropdown';
 import SideMenuComponent from '../menu/SideMenu';
 import { Checkbox } from 'primereact/checkbox';
 import authService from '../../services/auth.service';
+import UserService from '../../services/user.service';
+import { Toast } from 'primereact/toast';
 
  class UserCreateComponent extends React.Component {
 
   constructor(props) {
     super(props);
-
-   this.save=this.save.bind(this);
-   this.reset=this.reset.bind(this);
+    
+    this.save=this.save.bind(this);
+    this.reset=this.reset.bind(this);
    //this.onRolesChange=this.onRolesChange.bind(this);
    
    this.state = {
     showContent: false,
     desiganationType: null,
     roles:[],
+    userId:'',
     name:'',
     email:'',
     contactNumber:'',
     location:'',
     checked: false,
-    selectedRoles:[]
+    selectedRoles:[],
+    loading : false
    
     };
    
@@ -44,54 +48,130 @@ import authService from '../../services/auth.service';
   componentDidMount() { // New Method added By Dipankar
 
     const user = authService.getCurrentUser();
+    let email=localStorage.getItem('email');
 
-    if (user && user.permissions.includes("CREATE_USER")) {
-      
+    //alert(user && user.permissions.includes("CREATE_USER") && !(email));
+
+    if (user && user.permissions.includes("CREATE_USER") && !(email)) {
+     
       this.setState({
         showContent: true,
         desiganationType: null,
         roles:[],
+        userId:'',
         name:'',
         email:'',
         contactNumber:'',
         location:'',
         checked:false,
-        selectedRoles:[]
+        selectedRoles:[],
+        loading : true
         });
 
         authService.getRoles().then((response) => {
             //alert(JSON.stringify(response.data));
-            //alert(response.data);
             const rolesList=[];
             for(let i = 0; i < response.data.length; i++) {
               rolesList.push(response.data[i]);
             }
             
             this.setState({
-              roles:[...rolesList]
+              roles:[...rolesList],
+              loading : false
             });
-            
          },
          error => {
-             
+           alert("error" + error);
+           this.setState({
+            showContent:false,
+            loading : false
+          });
+           
          }
        );
 
+       
+    }else if(user && user.permissions.includes("EDIT_USER") && email){
 
+     
+
+      this.setState({
+        showContent: true,
+        desiganationType: null,
+        roles:[],
+        userId:'',
+        name:'',
+        email:'',
+        contactNumber:'',
+        location:'',
+        checked:false,
+        selectedRoles:[],
+        loading : true
+        });
+
+
+        authService.getRoles().then((response) => {
+          //alert(JSON.stringify(response.data));
+          const rolesList=[];
+          for(let i = 0; i < response.data.length; i++) {
+            rolesList.push(response.data[i]);
+          }
+          
+          this.setState({
+            roles:[...rolesList]
+          });
+       },
+       error => {
+       }
+     );
+
+     
+     if(email!=" "){
+        UserService.findUserByEmail(email).then(response => {
+       
+          authService.getRolesByUserName(email).then(response => {
+            var names = JSON.stringify(response.data.user.selectedRoles);
+            names=names.replace(/['"]+/g,'');//remove double quotes
+            names=names.replace(/[\])}[{(]/g, ''); //remove [] charecter 
+            var nameArr = names.split(',');
+       
+            const rolesList=[];
+            for(let i = 0; i <nameArr.length; i++) {
+                  rolesList.push(nameArr[i]);
+            }
+          
+            this.setState({
+              selectedRoles:[...rolesList]
+            });
+          });
+          this.setState({
+            userId:response.data.output[0].userId,
+            name:response.data.output[0].name,
+            email:response.data.output[0].email,
+            contactNumber:response.data.output[0].contactNumber,
+            location:response.data.output[0].location,
+            desiganationType:response.data.output[0].desiganationType,
+            loading : false
+          });
+       
+        });
+      }
+      localStorage.setItem("email","");
     }else{
       this.setState({
         showContent: false,
         desiganationType: null,
         roles:[],
         selectedRoles:[],
+        userId:'',
         name:'',
         email:'',
         contactNumber:'',
         location:'',
-        checked:false
+        checked:false,
+        loading : false
         });
     }
-
     
   }
 
@@ -139,13 +219,43 @@ import authService from '../../services/auth.service';
       } */
     
 save(){
-    alert(JSON.stringify(this.state));
+ // this.toast.show({severity:'success', summary: 'Success Message', detail:'Message Content', life: 3000});
+  
+   authService.saveUser(JSON.stringify(this.state)).then(response => {
+    
+    if (response.data.user.userId) {
+    
+     let isSaved=null;
+     
+     isSaved= UserService.saveUser(response.data.user).then(response => {
+    
+      if (response.data.output!=null) {
+        //alert(response.data.output.userId);
+        
+        alert("User Created / Updated");
+      }else{
+       // return null
+       alert("User Not created:email or username is already exist");
+      }
+    });
+     
+    }else{
+      alert("User Not created:email or username is already exist");
+    }
+  })
+  .catch(error => {
+    alert("User Not created:email or username is already exist");
+    //return null;
+});
+    //userService.saveUser(JSON.stringify(this.state));
+    //alert(JSON.stringify(this.state));
    
 }
+
 reset(){
   this.setState({
     desiganationType: null,
-    
+    userId:'',
     name:'',
     email:'',
     contactNumber:'',
@@ -156,7 +266,14 @@ reset(){
     
 }
   render() {
-    if(!this.state.showContent){
+    <Toast ref={(el) => this.toast = el} />
+    if(this.state.loading){
+      return (
+        <div>
+          <h3>Loading, Please Wait ....</h3>
+        </div>
+        );
+    }else if(!this.state.showContent){
         return (
           <div>
             <h3>Not Authorized to access this page</h3>
@@ -165,7 +282,7 @@ reset(){
       }else{     
      return (
       <div>
-       <Panel header="Create User" >
+      
         
         
         <div class="grid">
@@ -177,6 +294,7 @@ reset(){
             <label for="name" class="col-12 mb-2 md:col-2 md:mb-0"> Name</label>
             <div class="col-12 md:col-10">
                 <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
+                <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
             </div>
         </div>
         <div class="field grid">
@@ -267,7 +385,7 @@ reset(){
         </Panel>
         </div>
     </div>
-            </Panel>
+           
                     
       </div>
     );

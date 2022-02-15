@@ -1,9 +1,15 @@
 import axios from 'axios';
 import authHeader from './auth-header';
-
+import {UserDto} from '../model/userDto';
 const API_URL = "http://localhost:9000/resource/user";
 
 class UserService {
+  
+  constructor() {
+    this.userDto =new UserDto();
+    this.email='';
+  }
+
   getPublicContent() {
     return axios.get(API_URL + '/resource/resource');
   }
@@ -11,9 +17,11 @@ class UserService {
   getUserBoard() {
     return axios.get(API_URL + '/resource/securedUser', { headers: authHeader() });
   }
+  
   getAdminBoard() {
     return axios.get(API_URL + '/resource/securedAdmin', { headers: authHeader() });
   }
+
 // add By Dipankar
   getAllUsers(){
     //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
@@ -30,15 +38,50 @@ class UserService {
     }else{
       return [];
     }
+  });
+}
+  saveUser(userDto){
+    //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
+    const user = JSON.parse(localStorage.getItem('user'));
+    //alert("in user service"+userDto);
+    return axios({
+      url: API_URL + '/saveUser',
+      method: 'post', 
+      data: userDto,
+      headers:  authHeader() 
+  });
+  
+}
 
-    
-  })
-  ;
+findUserByEmail(email){
+  //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
+  const user = JSON.parse(localStorage.getItem('user'));
+  //alert("in user service"+userDto);
+  return axios({
+    url: API_URL + '/findByEmail/'+email,
+    method: 'get', 
+    headers: { 'content-type': 'application/JSON' ,
+              'Authorization': 'Bearer ' + user.access_token
+              }
+   
+});
+
+}
+
+toggleUserStatusByEmail(email){
+  //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
+  //alert("in user service"+userDto);
+  return axios({
+    url: API_URL + '/activateOrInActivateUserByEmail/'+email,
+    method: 'delete', 
+    headers: authHeader() 
+   
+});
+
+}
 
 
 
-
-  }
 
 
 }
