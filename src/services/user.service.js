@@ -60,13 +60,33 @@ findUserByEmail(email){
   return axios({
     url: API_URL + '/findByEmail/'+email,
     method: 'get', 
-    headers: { 'content-type': 'application/JSON' ,
-              'Authorization': 'Bearer ' + user.access_token
-              }
+    headers: authHeader()
    
-});
+  });
 
 }
+
+
+
+findByUserId(userId){
+ 
+  return axios({
+    url: API_URL + '/findByUserId/'+userId,
+    method: 'get', 
+    headers: authHeader()
+   
+  });
+
+}
+
+findByParentUserIdAndUserType(parentUserId){
+  return axios({
+    url: API_URL + '/findByParentUserIdAndUserType/'+parentUserId,
+    method: 'get', 
+    headers: authHeader()
+  });
+}
+
 
 toggleUserStatusByEmail(email){
   //return  axios.get(API_URL + '/findAll', { headers: authHeader() });

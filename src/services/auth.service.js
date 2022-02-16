@@ -1,7 +1,7 @@
 import axios from "axios";
 import {UserDto} from '../model/userDto';
 import authHeader from './auth-header';
-import UserService from '../services/user.service';
+import userService from '../services/user.service';
 
 const API_URL = "http://localhost:9999";
 const RESOUCE_API_URL ="http://localhost:9000/oauth-resource";
@@ -23,8 +23,7 @@ class AuthService {
           params: { 'grant_type':'password','username':username,'password': password},
           headers: {
           'Content-Type':'application/x-www-form-urlencoded' 
-          //'Authorization': 'Basic Y2xpZW50YXBwOnBhc3N3b3JkMTIz'   
-        } ,
+          } ,
         auth: {
           username: 'clientapp',
           password: 'password123'
@@ -33,8 +32,8 @@ class AuthService {
       .then(response => {
         
         if (response.data.access_token) {
-          //alert("ok " + JSON.stringify(response.data));
           localStorage.setItem("user", JSON.stringify(response.data));
+
         }
 
         return response.data;

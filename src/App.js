@@ -33,7 +33,7 @@ import CreateOrgComponent from './components/super_user/create.org.component';
 import EditOrgComponent from './components/super_user/edit.org.component';
 import ManageDocComponent from './components/super_user/manage.document.type.component';
 import ManageRolesComponent from './components/users/manage.roles.component';
-
+import viewOrgComponent from "./components/super_user/view.org.component";
 class App extends Component {
 
   constructor(props) {
@@ -57,22 +57,19 @@ class App extends Component {
 
   componentDidMount() {
     const user = AuthService.getCurrentUser();
+
     if (user) {
 
         // logic for Menu 
         let menus = this.state.items;
         
         
-          menus.push(/*{
-              label: 'User',
-              icon: 'pi pi-fw pi-power-off',
-              url:'/user'
-          },
+          menus.push(
           {
-              label: 'Profile',
-              icon: 'pi pi-fw pi-power-off',
-              url:'/Profile'
-          },*/
+            label: 'Manage Organization',
+            icon: 'pi pi-user',
+            items: []
+          },
           {
             label: 'Manage User',
             icon: 'pi pi-user',
@@ -106,12 +103,22 @@ class App extends Component {
 
 
         if(user.permissions.includes("CREATE_ORG")){
-          menus.push({
-            label: 'Create Organization',
-            icon: 'pi pi-briefcase',
-            url:'/createOrg'
-          });
-      }
+
+          for(let i = 0; i < menus.length; i++) {
+            if(menus[i].label == 'Manage Organization'){
+              menus[i].items.push({label: 'Create Organization', icon: 'pi pi-briefcase' ,url:'/createOrg'});
+            }
+          }
+       }
+
+       if(user.permissions.includes("VIEW_ORG")){
+
+        for(let i = 0; i < menus.length; i++) {
+          if(menus[i].label == 'Manage Organization'){
+            menus[i].items.push({label: 'View Organization', icon: 'pi pi-briefcase' ,url:'/viewOrg'});
+          }
+        }
+    }
 
       if(user.permissions.includes("EDIT_ORG")){
         for(let i = 0; i < menus.length; i++) {
@@ -273,6 +280,7 @@ if(user.permissions.includes("CREATE_CANDIDATE")){
             
             
             <Route exact path="/createOrg" component={CreateOrgComponent} />
+            <Route exact path="/viewOrg" component={viewOrgComponent} />
            
           </Switch>
           </Router>

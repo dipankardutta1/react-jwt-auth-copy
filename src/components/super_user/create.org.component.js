@@ -11,28 +11,24 @@ import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import SideMenuComponent from '../menu/SideMenu';
 import authService from '../../services/auth.service';
+import userService from '../../services/user.service';
 
  class CreateOrgComponent extends React.Component {
 
   constructor(props) {
     super(props);
   
-   this.industryTypesChange = this.industryTypesChange.bind(this);
+  
    this.save=this.save.bind(this);
-   this.handleValidity=this.handleValidity.bind(this);
+  
    
    this.state = {
-    industryType: null,
-    industryTypeValue:null,
-    validity:null,
-    showContent: false //  new code By Dipankar
+    loading:false,
+    showContent: false 
     };
    
-    this.industryTypes = [
-      { name: 'IT',code: 'IT'},
-      { name: 'SOftware',code: 'Software' }
-      
-  ];
+    this.industryTypes = [ 'IT','Finance'];
+     
      
   }//end
 
@@ -44,16 +40,12 @@ import authService from '../../services/auth.service';
     if (user && user.permissions.includes("CREATE_ORG")) {
       
       this.setState({
-        industryType: null,
-        industryTypeValue:null,
-        validity:null,
+        loading:false,
         showContent: true
       });
     }else{
       this.setState({
-        industryType: null,
-        industryTypeValue:null,
-        validity:null,
+        loading:false,
         showContent: false
       });
     }
@@ -64,25 +56,63 @@ import authService from '../../services/auth.service';
 
 
 
-  industryTypesChange(e) {
-  
-    this.setState({ 
-        industryType: e.value,
-        industryTypeValue:e.value.code
-    });
-   
-}
+
 save(){
-    alert(this.state.industryTypeValue);
-    alert(this.state.validity);
+
+  const user = authService.getCurrentUser();
+
+  this.setState({
+    parentUserId : user.userId 
+  });
+    
+
+    if(this.state.userId){
+      alert("edit " + JSON.stringify(this.state));
+    }else{
+     // alert("create " + JSON.stringify(this.state));
+
+
+      authService.saveUser(JSON.stringify(this.state)).then(response => {
+    
+        if (response.data.user.userId) {
+
+          this.setState({
+            userId : response.data.user.userId
+          });
+
+          
+         userService.saveUser(this.state).then(response => {
+        
+          if (response.data.output) {
+            //alert(response.data.output.userId);
+            
+            alert("User Created / Updated");
+          }else{
+           // return null
+           alert("User Not created:email or username is already exist");
+          }
+        });
+
+        }else{
+          alert("User Not created:email or username is already exist");
+        }
+      }).catch(error => {
+        alert("User Not created:email or username is already exist");
+        //return null;
+      });
+    }
+    
 }
-handleValidity(e){
-    this.setState({ 
-        validity: new Date(e.value)
-    });
-}
+
+
   render() {
-    if(!this.state.showContent){
+    if(this.state.loading){
+      return (
+        <div>
+          <h3>Loading, Please Wait ....</h3>
+        </div>
+        );
+    }else if(!this.state.showContent){
         return (
           <div>
             <h3>Not Authorized to access this page</h3>
@@ -99,48 +129,44 @@ handleValidity(e){
     <div class="field grid">
         <label for="organizationName" class="col-12 mb-2 md:col-2 md:mb-0">Organization Name</label>
         <div class="col-12 md:col-10">
-            <input id="organizationName" type="text" value="Intello group"class="inputfield w-full"></input>
+        <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
+        <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
         </div>
     </div>
     <div class="field grid">
         <label for="organizationEmail" class="col-12 mb-2 md:col-2 md:mb-0">Organization Email</label>
         <div class="col-12 md:col-10">
-            <input id="organizationEmail" type="text" value="admin@intello.com" class="inputfield w-full"></input>
+        <InputText value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} />
         </div>
     </div>
     <div class="field grid">
         <label for="organizationWebsite" class="col-12 mb-2 md:col-2 md:mb-0">Organization Website</label>
         <div class="col-12 md:col-10">
-            <input id="organizationWebsite" type="text" value="www.intellogroup.com" class="inputfield w-full"></input>
+        <InputText value={this.state.organizationUrl} onChange={(e) => this.setState({organizationUrl: e.target.value})} />
         </div>
     </div><div class="field grid">
         <label for="sizeOfEmployee" class="col-12 mb-2 md:col-2 md:mb-0">Size of Employee</label>
         <div class="col-12 md:col-10">
-            <input id="sizeOfEmployee" type="text" value="70" class="inputfield w-full"></input>
+        <InputText value={this.state.sizeOfEmployees} onChange={(e) => this.setState({sizeOfEmployees: e.target.value})} />
         </div>
     </div>
     <div class="field grid">
         <label for="location" class="col-12 mb-2 md:col-2 md:mb-0">Location</label>
         <div class="col-12 md:col-10">
-            <input id="location" type="text" value="Alabama,USA" class="inputfield w-full"></input>
-        </div>
+          <InputText value={this.state.location} onChange={(e) => this.setState({location: e.target.value})} />
+         </div>
     </div>
-    <div class="field grid">
-        <label for="validity" class="col-12 mb-2 md:col-2 md:mb-0">Validity</label>
-        <div class="col-12 md:col-2">
-        <Calendar value={this.state.validity} dateFormat="mm/dd/yy" onChange={this.handleValidity}></Calendar>
-  </div>
-    </div>
+    
     <div class="field grid">
         <label for="industryType" class="col-12 mb-2 md:col-2 md:mb-0">Industry Type</label>
         <div class="col-12 md:col-2">
-        <Dropdown value={this.state.industryType} options={this.industryTypes} onChange={this.industryTypesChange} optionLabel="name" placeholder="Industry Type" />
+        <Dropdown value={this.state.organizationType} options={this.industryTypes}  onChange={(e) => this.setState({organizationType: e.target.value})} placeholder="Please select Industry Type" />
         </div>
     </div>
     <div class="field grid">
         <label for="tagLine" class="col-12 mb-2 md:col-2 md:mb-0">Tag Line</label>
         <div class="col-12 md:col-10">
-            <input id="tagLine" type="text" value="Your best service provider" class="inputfield w-full"></input>
+        <InputText value={this.state.tagLine} onChange={(e) => this.setState({tagLine: e.target.value})} />
         </div>
     </div>
     <div class="field grid">
