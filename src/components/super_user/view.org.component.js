@@ -14,12 +14,14 @@ import authService from '../../services/auth.service';
 import userService from '../../services/user.service';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { ToggleButton } from 'primereact/togglebutton';
 
  class ViewOrgComponent extends React.Component {
 
   constructor(props) {
     super(props);
 
+    
     this.state = {
       loading:false,
       showContent:false,
@@ -79,10 +81,68 @@ import { Column } from 'primereact/column';
 
 
 
+  editRow(rowData) {
+ 
+    return (<div>
+      <Button
+        type="button" icon="pi pi-user-edit" value="Edit"
+        className="ui-button-success" onClick={() => this.editOrg(rowData.userId)}
+      />
+      
+    </div>);
+  }
 
+
+  editOrg(userId){
+    this.props.history.push("/createOrg");
+    localStorage.setItem("userId", userId);
+  }
   
+  deleteRow(rowData) {
+ 
+    return (<div>
+      <ToggleButton checked={!rowData.isDeleted} 
+      onChange={(e) =>  this.onToggleClick(e,rowData)} 
+      onIcon="pi pi-check" offIcon="pi pi-times" />
+    </div>);
+  }
+  
+  onToggleClick(val,rowData){
+    this.setState({
+      loading : true
+    });
+  
+    userService.toggleUserStatusByEmail(rowData.email).then((response) => {
+      userService.findByParentUserIdAndUserType(authService.getCurrentUser().userId).then((resp) => {
+        
+        this.setState({
+          showContent: true,
+          loading : false,
+          users: resp.data.output
+        });
 
-
+        //alert(response);
+      },
+      error => {
+        this.setState({
+          showContent: false,
+          loading : false,
+          users: []
+        });
+      });
+    },
+    error => {
+        this.setState({
+          showContent: false,
+          loading : false,
+          candidates: []
+      });
+    });
+  
+    
+      
+   
+  }
   
 
 render() {
@@ -114,7 +174,8 @@ render() {
                       <Column field="name" header="Name"></Column>
                       <Column field="email" header="Email"></Column>
                     
-                     
+                      <Column  body={this.editRow.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_ORG")}></Column>
+                      <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_ORG")}></Column>
                   </DataTable>
               </div>
           </Panel>

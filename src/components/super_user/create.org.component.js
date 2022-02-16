@@ -36,13 +36,41 @@ import userService from '../../services/user.service';
   componentDidMount() { // New Method added By Dipankar
 
     const user = authService.getCurrentUser();
+    let userId=localStorage.getItem('userId');
 
-    if (user && user.permissions.includes("CREATE_ORG")) {
+    if (user && user.permissions.includes("CREATE_ORG") && !(userId)) {
       
       this.setState({
         loading:false,
-        showContent: true
+        showContent: true,
+        parentUserId : user.userId 
       });
+    }else if(user && user.permissions.includes("EDIT_ORG") && userId){
+      this.setState({
+        loading:true,
+        showContent: false,
+        parentUserId : user.userId 
+      });
+      
+      userService.findByUserId(userId).then(response => {
+       
+        //alert(JSON.stringify(response.data.output));
+        this.setState({
+          userId:response.data.output.userId,
+          name:response.data.output.name,
+          email:response.data.output.email,
+          organizationUrl:response.data.output.organizationUrl,
+         location:response.data.output.location,
+          sizeOfEmployees:response.data.output.sizeOfEmployees,
+          organizationType:response.data.output.organizationType,
+          tagLine:response.data.output.tagLine,
+          loading : false,
+          showContent: true
+        });
+     
+      });
+    
+      localStorage.setItem("userId","");
     }else{
       this.setState({
         loading:false,
@@ -67,7 +95,30 @@ save(){
     
 
     if(this.state.userId){
-      alert("edit " + JSON.stringify(this.state));
+
+      authService.saveUser(JSON.stringify(this.state)).then(response => {
+    
+        if (response.data.user.userId) {
+          userService.saveUser(this.state).then(response => {
+        
+            if (response.data.output) {
+              //alert(response.data.output.userId);
+              
+              alert("User Updated");
+            }else{
+             // return null
+             alert("User Not created:email or username is already exist");
+            }
+        });
+
+        }else{
+          alert("User Not Updated:email or username is already exist");
+        }
+      }).catch(error => {
+        alert("User Not Updated:email or username is already exist");
+        //return null;
+      });
+
     }else{
      // alert("create " + JSON.stringify(this.state));
 
@@ -86,7 +137,7 @@ save(){
           if (response.data.output) {
             //alert(response.data.output.userId);
             
-            alert("User Created / Updated");
+            alert("User Created");
           }else{
            // return null
            alert("User Not created:email or username is already exist");
@@ -102,6 +153,7 @@ save(){
       });
     }
     
+
 }
 
 
@@ -130,6 +182,8 @@ save(){
         <label for="organizationName" class="col-12 mb-2 md:col-2 md:mb-0">Organization Name</label>
         <div class="col-12 md:col-10">
         <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
+        <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
+        
         <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
         </div>
     </div>
