@@ -135,7 +135,7 @@ import { ToggleButton } from 'primereact/togglebutton';
         this.setState({
           showContent: false,
           loading : false,
-          candidates: []
+          users: []
       });
     });
   

@@ -21,12 +21,11 @@ import { ToggleButton } from 'primereact/togglebutton';
   constructor(props) {
      
     super(props);
-    this.onBtnClick=this.onBtnClick.bind(this);
-    this.editTemplate=this.editTemplate.bind(this);
+    
     this.state = {
         showContent: false,
         loading : false,
-        candidates: []
+        users: []
     };
    
      
@@ -35,112 +34,121 @@ import { ToggleButton } from 'primereact/togglebutton';
 
     const user = authService.getCurrentUser();
 
+    this.state = {
+      loading:false,
+      showContent:false,
+      users:[]
+      };
+
+
     if (user && user.permissions.includes("VIEW_USER")) {
-      this.setState({
-        showContent: true,
-        loading : true,
-        candidates: []
-      });
-      userService.getAllUsers().then((response) => {
-
+        this.setState({
+          showContent: true,
+          loading : true,
+          users: []
+        });
+        
        
-
-            this.setState({
-              showContent: true,
-              loading : false,
-              candidates: response
+        userService.findByParentUserIdAndUserType(user.userId).then((response) => {
+        
+          this.setState({
+            showContent: true,
+            loading : false,
+            users: response.data.output
           });
+  
+          //alert(response);
         },
         error => {
-            this.setState({
-              showContent: false,
-              loading : false,
-              candidates: []
+          this.setState({
+            showContent: false,
+            loading : false,
+            users: []
           });
+
+          //alert("Error " +error);
+
         }
       );
-
-      //alert(JSON.stringify(userDetails));
      
-    }else{
-      this.setState({
-        showContent: false,
-        loading : false,
-        candidates: []
-    });
     }
 
     
   }
-onBtnClick(e){
-  this.props.history.push("/createNewUser");
-    //alert("candidate email = "+e);
-    localStorage.setItem("email", JSON.stringify(e));
+
+
+
+  editRow(rowData) {
+ 
+    return (<div>
+      <Button
+        type="button" icon="pi pi-user-edit" value="Edit"
+        className="ui-button-success" onClick={() => this.editOrg(rowData.userId)}
+      />
+      
+    </div>);
+  }
+
+
+  editOrg(userId){
+    this.props.history.push("/createNewUser");
+    localStorage.setItem("userId", userId);
+  }
   
-}
-editTemplate(rowData) {
+  deleteRow(rowData) {
  
-  return (<div>
-    <Button
-      type="button" icon="pi pi-user-edit" value="Edit"
-      className="ui-button-success" onClick={() => this.onBtnClick(rowData.email)}
-    />
-    
-  </div>);
-}
-
-
-deleteRow(rowData) {
- 
-  return (<div>
-    <ToggleButton checked={!rowData.isDeleted} 
-    onChange={(e) =>  this.onToggleClick(e,rowData)} 
-    onIcon="pi pi-check" offIcon="pi pi-times" />
-  </div>);
-}
-
-onToggleClick(val,rowData){
-  this.setState({
-    loading : true
-  });
-
-  userService.toggleUserStatusByEmail(rowData.email).then((response) => {
-    userService.getAllUsers().then((response) => {
-          this.setState({
-            showContent: true,
-            loading : false,
-            candidates: response
+    return (<div>
+      <ToggleButton checked={!rowData.isDeleted} 
+      onChange={(e) =>  this.onToggleClick(e,rowData)} 
+      onIcon="pi pi-check" offIcon="pi pi-times" />
+    </div>);
+  }
+  
+  onToggleClick(val,rowData){
+    this.setState({
+      loading : true
+    });
+  
+    userService.toggleUserStatusByEmail(rowData.email).then((response) => {
+      userService.findByParentUserIdAndUserType(authService.getCurrentUser().userId).then((resp) => {
+        
+        this.setState({
+          showContent: true,
+          loading : false,
+          users: resp.data.output
         });
+
+        //alert(response);
       },
       error => {
-          this.setState({
-            showContent: false,
-            loading : false,
-            candidates: []
+        this.setState({
+          showContent: false,
+          loading : false,
+          users: []
         });
-      }
-    );
-  },
-  error => {
-      this.setState({
-        showContent: false,
-        loading : false,
-        candidates: []
+      });
+    },
+    error => {
+        this.setState({
+          showContent: false,
+          loading : false,
+          users: []
+      });
     });
-  }
-  );
-
   
     
- 
-}
+      
+   
+  }
+
+
+
+
+
+
 
 
   render() {
-
-    
-
-
 
     if(this.state.loading){
       return (
@@ -159,20 +167,24 @@ onToggleClick(val,rowData){
           <div> 
               <Panel header="View User" >
                 <div className="card">
-                    <DataTable value={this.state.candidates} 
+                    <DataTable value={this.state.users} 
                      responsiveLayout="scroll">
                         
                         <Column field="name" header="Name"></Column>
                         <Column field="email" header="Email"></Column>
                       
-                        <Column  body={this.editTemplate.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_USER")}></Column>
+                        <Column  body={this.editRow.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_USER")}></Column>
                         <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_USER")}></Column>
                     </DataTable>
                 </div>
             </Panel>
           </div>
     );
-     }
+    }
+
+
+
+    
   }
 }
 

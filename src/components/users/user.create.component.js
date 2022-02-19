@@ -14,6 +14,7 @@ import { Checkbox } from 'primereact/checkbox';
 import authService from '../../services/auth.service';
 import UserService from '../../services/user.service';
 import { Toast } from 'primereact/toast';
+import userService from '../../services/user.service';
 
  class UserCreateComponent extends React.Component {
 
@@ -23,24 +24,17 @@ import { Toast } from 'primereact/toast';
     this.save=this.save.bind(this);
     this.reset=this.reset.bind(this);
    //this.onRolesChange=this.onRolesChange.bind(this);
-   
+
    this.state = {
+    loading:false,
     showContent: false,
-    desiganationType: null,
-    roles:[],
-    userId:'',
-    name:'',
-    email:'',
-    contactNumber:'',
-    location:'',
-    checked: false,
-    selectedRoles:[],
-    loading : false
-   
+    selectedRoles:['ROLE_USER']
     };
    
+   
+   
     this.desiganationTypes = ['HR','Accountant','User','Admin','Reviewer'];
-    this.onCategoryChange = this.onCategoryChange.bind(this);
+    //this.onCategoryChange = this.onCategoryChange.bind(this);
   
   }//end
 
@@ -48,26 +42,19 @@ import { Toast } from 'primereact/toast';
   componentDidMount() { // New Method added By Dipankar
 
     const user = authService.getCurrentUser();
-    let email=localStorage.getItem('email');
+    let userId=localStorage.getItem('userId');
 
     //alert(user && user.permissions.includes("CREATE_USER") && !(email));
 
-    if (user && user.permissions.includes("CREATE_USER") && !(email)) {
+    if (user && user.permissions.includes("CREATE_USER") && !(userId)) {
      
       this.setState({
+        loading:false,
         showContent: true,
-        desiganationType: null,
-        roles:[],
-        userId:'',
-        name:'',
-        email:'',
-        contactNumber:'',
-        location:'',
-        checked:false,
-        selectedRoles:[],
-        loading : true
-        });
+        parentUserId : user.userId 
+      });
 
+        /*
         authService.getRoles().then((response) => {
             //alert(JSON.stringify(response.data));
             const rolesList=[];
@@ -89,92 +76,46 @@ import { Toast } from 'primereact/toast';
            
          }
        );
-
+       */
        
-    }else if(user && user.permissions.includes("EDIT_USER") && email){
+    }else if(user && user.permissions.includes("EDIT_USER") && userId){
 
      
 
       this.setState({
-        showContent: true,
-        desiganationType: null,
-        roles:[],
-        userId:'',
-        name:'',
-        email:'',
-        contactNumber:'',
-        location:'',
-        checked:false,
-        selectedRoles:[],
-        loading : true
+        loading:true,
+        showContent: false,
+        parentUserId : user.userId 
+      });
+
+      userService.findByUserId(userId).then(response => {
+       
+        //alert(JSON.stringify(response.data.output));
+        this.setState({
+          userId:response.data.output.userId,
+          name:response.data.output.name,
+          email:response.data.output.email,
+          contactNumber:response.data.output.contactNumber,
+          location:response.data.output.location,
+          desiganationType:response.data.output.desiganationType,
+          loading : false,
+          showContent: true
         });
-
-
-        authService.getRoles().then((response) => {
-          //alert(JSON.stringify(response.data));
-          const rolesList=[];
-          for(let i = 0; i < response.data.length; i++) {
-            rolesList.push(response.data[i]);
-          }
-          
-          this.setState({
-            roles:[...rolesList]
-          });
-       },
-       error => {
-       }
-     );
-
      
-     if(email!=" "){
-        UserService.findUserByEmail(email).then(response => {
-       
-          authService.getRolesByUserName(email).then(response => {
-            var names = JSON.stringify(response.data.user.selectedRoles);
-            names=names.replace(/['"]+/g,'');//remove double quotes
-            names=names.replace(/[\])}[{(]/g, ''); //remove [] charecter 
-            var nameArr = names.split(',');
-       
-            const rolesList=[];
-            for(let i = 0; i <nameArr.length; i++) {
-                  rolesList.push(nameArr[i]);
-            }
-          
-            this.setState({
-              selectedRoles:[...rolesList]
-            });
-          });
-          this.setState({
-            userId:response.data.output[0].userId,
-            name:response.data.output[0].name,
-            email:response.data.output[0].email,
-            contactNumber:response.data.output[0].contactNumber,
-            location:response.data.output[0].location,
-            desiganationType:response.data.output[0].desiganationType,
-            loading : false
-          });
-       
-        });
-      }
-      localStorage.setItem("email","");
+      });
+    
+      localStorage.setItem("userId","");
+     
+        
     }else{
       this.setState({
-        showContent: false,
-        desiganationType: null,
-        roles:[],
-        selectedRoles:[],
-        userId:'',
-        name:'',
-        email:'',
-        contactNumber:'',
-        location:'',
-        checked:false,
-        loading : false
-        });
+        loading:false,
+        showContent: false
+      });
     }
     
   }
-
+/*
   onCategoryChange(e) {
     let selectedRoles = [...this.state.selectedRoles];
 
@@ -194,7 +135,7 @@ import { Toast } from 'primereact/toast';
 
     this.setState({ selectedRoles });
 }
-
+*/
   
    /* onRolesChange = (e) => {
    
@@ -218,39 +159,76 @@ import { Toast } from 'primereact/toast';
         
       } */
     
-save(){
- // this.toast.show({severity:'success', summary: 'Success Message', detail:'Message Content', life: 3000});
-  
-   authService.saveUser(JSON.stringify(this.state)).then(response => {
-    
-    if (response.data.user.userId) {
-    
-     let isSaved=null;
-     
-     isSaved= UserService.saveUser(response.data.user).then(response => {
-    
-      if (response.data.output!=null) {
-        //alert(response.data.output.userId);
-        
-        alert("User Created / Updated");
-      }else{
-       // return null
-       alert("User Not created:email or username is already exist");
+      save(){
+
+        const user = authService.getCurrentUser();
+      
+        this.setState({
+          parentUserId : user.userId 
+        });
+          
+      
+          if(this.state.userId){
+      
+            authService.saveUser(JSON.stringify(this.state)).then(response => {
+          
+              if (response.data.user.userId) {
+                userService.saveUser(this.state).then(response => {
+              
+                  if (response.data.output) {
+                    //alert(response.data.output.userId);
+                    
+                    alert("User Updated");
+                  }else{
+                   // return null
+                   alert("User Not created:email or username is already exist");
+                  }
+              });
+      
+              }else{
+                alert("User Not Updated:email or username is already exist");
+              }
+            }).catch(error => {
+              alert("User Not Updated:email or username is already exist");
+              //return null;
+            });
+      
+          }else{
+           // alert("create " + JSON.stringify(this.state));
+      
+      
+            authService.saveUser(JSON.stringify(this.state)).then(response => {
+          
+              if (response.data.user.userId) {
+      
+                this.setState({
+                  userId : response.data.user.userId
+                });
+      
+                
+               userService.saveUser(this.state).then(response => {
+              
+                if (response.data.output) {
+                  //alert(response.data.output.userId);
+                  
+                  alert("User Created");
+                }else{
+                 // return null
+                 alert("User Not created:email or username is already exist");
+                }
+              });
+      
+              }else{
+                alert("User Not created:email or username is already exist");
+              }
+            }).catch(error => {
+              alert("User Not created:email or username is already exist");
+              //return null;
+            });
+          }
+          
+      
       }
-    });
-     
-    }else{
-      alert("User Not created:email or username is already exist");
-    }
-  })
-  .catch(error => {
-    alert("User Not created:email or username is already exist");
-    //return null;
-});
-    //userService.saveUser(JSON.stringify(this.state));
-    //alert(JSON.stringify(this.state));
-   
-}
 
 reset(){
   this.setState({
@@ -293,8 +271,11 @@ reset(){
         <div class="field grid">
             <label for="name" class="col-12 mb-2 md:col-2 md:mb-0"> Name</label>
             <div class="col-12 md:col-10">
+              <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
+              <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
+
                 <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
-                <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
+                
             </div>
         </div>
         <div class="field grid">
@@ -322,10 +303,11 @@ reset(){
             </div>
         </div>
         
+        {/*
         <div class="field grid">
             <label for="roles" class="col-12 mb-2 md:col-2 md:mb-0">Roles</label>
             <div class="col-12 md:col-10">
-            <div class="grid">
+            <div class="grid"> */}
             {/* {this.state.roles.map((object) => (    
             <div class="col-4">
             <div className="field-checkbox">
@@ -344,7 +326,7 @@ reset(){
                         })
                       } */}
                       
-                      {
+                      {/*
                         this.state.roles.map((category) => {
                             return (
                                 <div key={category} className="field-checkbox">
@@ -353,7 +335,7 @@ reset(){
                                 </div>
                             )
                         })
-                    }
+                      */}
                       
                       {/*}
             <div class="col-4">
@@ -369,9 +351,13 @@ reset(){
              </div>
           </div>
             {*/}
+            {/*
             </div>
            </div>
         </div>
+            */}
+
+        
         <div class="field grid">
             <div class="col-12 md:col-10 col-offset-6">
             <Button label="submit" icon="pi pi-user" onClick={this.save} className="p-button-raised p-button-rounded"/>

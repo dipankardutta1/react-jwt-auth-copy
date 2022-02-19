@@ -24,7 +24,8 @@ import userService from '../../services/user.service';
    
    this.state = {
     loading:false,
-    showContent: false 
+    showContent: false,
+    selectedRoles:['ROLE_ADMIN']
     };
    
     this.industryTypes = [ 'IT','Finance'];
