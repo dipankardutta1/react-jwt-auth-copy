@@ -94,6 +94,30 @@ findUserByEmail(email){
 }
 
 
+
+manageRole(roleDto){
+  
+  return axios({
+    url: API_URL + "/api/auth/manageRole",
+    method: 'post', 
+    data: roleDto,
+    headers: { 'content-type': 'application/JSON' },
+});
+
+}
+
+
+findRolesByparentUserId(parentUserId){
+  
+  return axios({
+    url: API_URL + "/api/auth/findRolesByparentUserId/"+parentUserId,
+    method: 'get', 
+    headers: { 'content-type': 'application/JSON' },
+});
+
+}
+
+
 }
 
 export default new AuthService();

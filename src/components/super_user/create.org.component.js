@@ -12,6 +12,19 @@ import { Dropdown } from 'primereact/dropdown';
 import SideMenuComponent from '../menu/SideMenu';
 import authService from '../../services/auth.service';
 import userService from '../../services/user.service';
+//import { Formik, Field, Form, ErrorMessage } from 'formik';
+//import * as Yup from 'yup';
+import { Form, Field } from 'react-final-form';
+import { classNames } from 'primereact/utils';
+// Importing toastify module
+import {toast} from 'react-toastify';
+ 
+// Import toastify css file
+import 'react-toastify/dist/ReactToastify.css';
+ 
+ // toast-configuration method,
+ // it is compulsory method.
+toast.configure()
 
  class CreateOrgComponent extends React.Component {
 
@@ -20,6 +33,11 @@ import userService from '../../services/user.service';
   
   
    this.save=this.save.bind(this);
+   this.onSubmit=this.onSubmit.bind(this);
+  
+   this.validate=this.validate.bind(this);
+   this.isFormFieldValid=this.isFormFieldValid.bind(this);
+   this.getFormErrorMessage=this.getFormErrorMessage.bind(this);
   
    
    this.state = {
@@ -32,6 +50,63 @@ import userService from '../../services/user.service';
      
      
   }//end
+
+
+  validate = (data) => {
+    let errors = {};
+    if (!data.name) {
+        errors.name = 'Organization Name is required.';
+    }
+    if (!data.location) {
+      errors.location = 'Location is required.';
+  }
+  if (!data.tagLine) {
+    errors.tagLine = 'Tag Line is required.';
+}
+if (!data.organizationType) {
+  errors.organizationType = ' Organization  Type is required.';
+}
+if (!data.organizationUrl) {
+  errors.organizationUrl = 'Organization Url is required.';
+}if (!data.sizeOfEmployees) {
+  errors.sizeOfEmployees = 'Size Of Employees  is required.';
+}
+if (!data.email) {
+  errors.email = 'Email is required.';
+}
+else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
+  errors.email = 'Invalid email address. E.g. example@email.com';
+}
+
+    return errors;
+};
+
+onSubmit = (data, form) => {
+  if(form){
+    
+     this.setState({
+      name:data.name,
+      email:data.email,
+      organizationUrl:data.organizationUrl,
+     location:data.location,
+      sizeOfEmployees:data.sizeOfEmployees,
+      organizationType:data.organizationType,
+      tagLine:data.tagLine,
+    
+    });
+    
+    this.save();
+  }
+  
+  
+};
+
+isFormFieldValid = (meta) => !!(meta.touched && meta.error);
+getFormErrorMessage = (meta) => {
+    return this.isFormFieldValid(meta) && <small className="p-error">{meta.error}</small>;
+};
+
+
 
 
   componentDidMount() { // New Method added By Dipankar
@@ -104,19 +179,19 @@ save(){
         
             if (response.data.output) {
               //alert(response.data.output.userId);
+              toast("Organization Updated");
               
-              alert("User Updated");
             }else{
              // return null
-             alert("User Not created:email or username is already exist");
+             toast("Organization Not Updated:email or name is already exist");
             }
         });
 
         }else{
-          alert("User Not Updated:email or username is already exist");
+          toast("Organization Not Updated:email or name is already exist");
         }
       }).catch(error => {
-        alert("User Not Updated:email or username is already exist");
+        toast("Organization Not Updated:email or name is already exist");
         //return null;
       });
 
@@ -138,24 +213,29 @@ save(){
           if (response.data.output) {
             //alert(response.data.output.userId);
             
-            alert("User Created");
+            toast("Organization Created");
           }else{
            // return null
-           alert("User Not created:email or username is already exist");
+           toast("Organization Not created:email or username is already exist");
           }
         });
 
         }else{
-          alert("User Not created:email or username is already exist");
+          toast("Organization Not created:email or username is already exist");
         }
       }).catch(error => {
-        alert("User Not created:email or username is already exist");
+        toast("Organization Not created:email or username is already exist");
         //return null;
       });
     }
     
 
 }
+
+
+
+
+
 
 
   render() {
@@ -175,6 +255,15 @@ save(){
      return (
       <div>
         <Panel header="Create Organization" >
+        <Form onSubmit={this.onSubmit} initialValues={
+          { name:this.state.name,email:this.state.email,location:this.state.location,
+            organizationUrl:this.state.organizationUrl,
+            sizeOfEmployees:this.state.sizeOfEmployees,
+            organizationType:this.state.organizationType,
+            tagLine:this.state.tagLine}
+          } 
+          validate={this.validate} render={({ handleSubmit }) => (
+  <form onSubmit={handleSubmit} className="p-fluid">
     <div class="grid">
     <div class="col-11">
     <Panel header="Enter Details">
@@ -185,48 +274,135 @@ save(){
         <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
         <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
         
+        {/*
         <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
+        */}
+        <Field name="name" render={({ input, meta }) => (
+                                <div className="field">
+                                    <span className="p-float-label">
+                                        <InputText id="name" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                                        <label htmlFor="name" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Organization Name</label>
+                                    </span>
+                                    {this.getFormErrorMessage(meta)}
+                                </div>
+          )} />
+        
         </div>
     </div>
     <div class="field grid">
         <label for="organizationEmail" class="col-12 mb-2 md:col-2 md:mb-0">Organization Email</label>
         <div class="col-12 md:col-10">
+        {/*
         <InputText value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} />
+        */}
+
+        <Field name="email" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="email" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="email" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Email</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+        )} />
+
         </div>
     </div>
     <div class="field grid">
         <label for="organizationWebsite" class="col-12 mb-2 md:col-2 md:mb-0">Organization Website</label>
         <div class="col-12 md:col-10">
+          {/*
         <InputText value={this.state.organizationUrl} onChange={(e) => this.setState({organizationUrl: e.target.value})} />
+          */}
+          <Field name="organizationUrl" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="organizationUrl" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="organizationUrl" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Organization Url</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+
         </div>
     </div><div class="field grid">
         <label for="sizeOfEmployee" class="col-12 mb-2 md:col-2 md:mb-0">Size of Employee</label>
         <div class="col-12 md:col-10">
+          {/*
         <InputText value={this.state.sizeOfEmployees} onChange={(e) => this.setState({sizeOfEmployees: e.target.value})} />
+          */}
+
+        <Field name="sizeOfEmployees" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="sizeOfEmployees" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="sizeOfEmployees" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Size Of Employees</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
         </div>
     </div>
     <div class="field grid">
         <label for="location" class="col-12 mb-2 md:col-2 md:mb-0">Location</label>
         <div class="col-12 md:col-10">
+          {/*
           <InputText value={this.state.location} onChange={(e) => this.setState({location: e.target.value})} />
-         </div>
+          */}
+          <Field name="location" render={({ input, meta }) => (
+              <div className="field">
+                  <span className="p-float-label">
+                      <InputText id="location" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                      <label htmlFor="location" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Location</label>
+                  </span>
+                  {this.getFormErrorMessage(meta)}
+              </div>
+          )} />
+         
+          </div>
     </div>
     
     <div class="field grid">
         <label for="industryType" class="col-12 mb-2 md:col-2 md:mb-0">Industry Type</label>
         <div class="col-12 md:col-2">
+          {/*
         <Dropdown value={this.state.organizationType} options={this.industryTypes}  onChange={(e) => this.setState({organizationType: e.target.value})} placeholder="Please select Industry Type" />
+          */}
+
+          <Field name="organizationType" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <Dropdown id="organizationType" options={this.industryTypes} {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="organizationType" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Organization Type</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+
+
         </div>
     </div>
     <div class="field grid">
         <label for="tagLine" class="col-12 mb-2 md:col-2 md:mb-0">Tag Line</label>
         <div class="col-12 md:col-10">
+          {/*
         <InputText value={this.state.tagLine} onChange={(e) => this.setState({tagLine: e.target.value})} />
+          */}
+
+        <Field name="tagLine" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="tagLine" options={this.industryTypes} {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="tagLine" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Tag Line</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
         </div>
     </div>
     <div class="field grid">
-        <div class="col-12 md:col-10 col-offset-6">
-        <Button label="save" icon="pi pi-user" onClick={this.save} className="p-button-raised p-button-rounded"/>
+        <div class="col-3 md:col-3 col-offset-3">
+        <Button label="save" icon="pi pi-user" type="submit" className="p-button-raised p-button-rounded"/>
         &nbsp; &nbsp; 
         <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
        
@@ -239,7 +415,9 @@ save(){
     </Panel>
     </div>
 </div>
-        </Panel>
+</form>
+)}/>
+</Panel>
       </div>
     );
 
