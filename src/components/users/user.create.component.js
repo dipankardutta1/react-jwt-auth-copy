@@ -172,7 +172,7 @@ import userService from '../../services/user.service';
       
             authService.saveUser(JSON.stringify(this.state)).then(response => {
           
-              if (response.data.user.userId) {
+              if (response.data.obj.userId) {
                 userService.saveUser(this.state).then(response => {
               
                   if (response.data.output) {
@@ -199,10 +199,10 @@ import userService from '../../services/user.service';
       
             authService.saveUser(JSON.stringify(this.state)).then(response => {
           
-              if (response.data.user.userId) {
+              if (response.data.obj.userId) {
       
                 this.setState({
-                  userId : response.data.user.userId
+                  userId : response.data.obj.userId
                 });
       
                 
