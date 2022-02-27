@@ -243,34 +243,40 @@ onToggleClick(val,rowData){
                    <label htmlFor="role3">Inactivate user</label>
              </div>
           </div>
+          <div class="col-4">
+            <div className="field-checkbox">
+                   <Checkbox inputId="role4" name="role" value="VIEW_USER" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('VIEW_USER') !== -1} />
+                   <label htmlFor="role3">View user</label>
+             </div>
+          </div>
             <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role3" name="role" value="CREATE_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('CREATE_CANDIDATE') !== -1} />
+                   <Checkbox inputId="role5" name="role" value="CREATE_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('CREATE_CANDIDATE') !== -1} />
                    <label htmlFor="role3">Create Candidate</label>
              </div>
           </div>
           <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role3" name="role" value="EDIT_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('EDIT_CANDIDATE') !== -1} />
+                   <Checkbox inputId="role6" name="role" value="EDIT_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('EDIT_CANDIDATE') !== -1} />
                    <label htmlFor="role3">Edit Candidate</label>
              </div>
           </div>
           <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role1" name="role" value="VIEW_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('VIEW_CANDIDATE') !== -1} />
+                   <Checkbox inputId="role7" name="role" value="VIEW_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('VIEW_CANDIDATE') !== -1} />
                    <label htmlFor="role1">View Candidate</label>
             </div>
             </div>  
             <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role2" name="role" value="REVIEW_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('REVIEW_CANDIDATE') !== -1} />
+                   <Checkbox inputId="role8" name="role" value="REVIEW_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('REVIEW_CANDIDATE') !== -1} />
                    <label htmlFor="role2">Review Candidate</label>
              </div>
           </div>  
             
           <div class="col-4">
             <div className="field-checkbox">
-                   <Checkbox inputId="role1" name="role" value="DELETE_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('DELETE_CANDIDATE') !== -1} />
+                   <Checkbox inputId="role9" name="role" value="DELETE_CANDIDATE" onChange={this.onPermissionsChange} checked={this.state.permissions.indexOf('DELETE_CANDIDATE') !== -1} />
                    <label htmlFor="role1">Inactivate Candidate</label>
             </div>
             </div>  

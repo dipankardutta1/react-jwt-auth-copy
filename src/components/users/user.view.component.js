@@ -144,9 +144,21 @@ import { ToggleButton } from 'primereact/togglebutton';
 
 
 
+  assignRole(rowData) {
+ 
+    return (<div>
+      <Button
+        type="button" icon="pi pi-user-edit" value="Assign"
+        className="ui-button-success" onClick={() => this.openAssignRolePage(rowData.userId)}
+      />
+      
+    </div>);
+  }
 
-
-
+  openAssignRolePage(userId){
+    this.props.history.push("/assignRole");
+    localStorage.setItem("userSelected", userId);
+  }
 
   render() {
 
@@ -174,6 +186,7 @@ import { ToggleButton } from 'primereact/togglebutton';
                         <Column field="email" header="Email"></Column>
                       
                         <Column  body={this.editRow.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_USER")}></Column>
+                        <Column body={this.assignRole.bind(this)} header="Assign Role" hidden={!authService.getCurrentUser().permissions.includes("MANAGE_ROLE")}></Column>
                         <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_USER")}></Column>
                     </DataTable>
                 </div>

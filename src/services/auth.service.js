@@ -118,6 +118,28 @@ findRolesByparentUserId(parentUserId){
 }
 
 
+getRolesByUserId(userId){
+  
+  return axios({
+    url: API_URL + "/api/auth/getRolesByUserId/"+userId,
+    method: 'get', 
+    headers: { 'content-type': 'application/JSON' },
+});
+
+}
+
+manageRoleForUser(userDto){
+  
+  return axios({
+    url: API_URL + "/api/auth/manageRoleForUser",
+    method: 'post', 
+    data: userDto,
+    headers: { 'content-type': 'application/JSON' },
+});
+
+}
+
+
 }
 
 export default new AuthService();

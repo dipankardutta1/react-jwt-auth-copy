@@ -34,6 +34,7 @@ import EditOrgComponent from './components/super_user/edit.org.component';
 import ManageDocComponent from './components/super_user/manage.document.type.component';
 import ManageRolesComponent from './components/users/manage.roles.component';
 import viewOrgComponent from "./components/super_user/view.org.component";
+import assignRolesComponent from "./components/users/assign.roles.component";
 class App extends Component {
 
   constructor(props) {
@@ -281,6 +282,7 @@ if(user.permissions.includes("CREATE_CANDIDATE")){
             
             <Route exact path="/createOrg" component={CreateOrgComponent} />
             <Route exact path="/viewOrg" component={viewOrgComponent} />
+            <Route exact path="/assignRole" component={assignRolesComponent} />
            
           </Switch>
           </Router>

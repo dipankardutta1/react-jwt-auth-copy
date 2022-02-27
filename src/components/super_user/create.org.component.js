@@ -93,9 +93,9 @@ onSubmit = (data, form) => {
       organizationType:data.organizationType,
       tagLine:data.tagLine,
     
-    });
+    },() => this.save());
     
-    this.save();
+    //this.save();
   }
   
   
@@ -114,6 +114,8 @@ getFormErrorMessage = (meta) => {
     const user = authService.getCurrentUser();
     let userId=localStorage.getItem('userId');
 
+    
+
     if (user && user.permissions.includes("CREATE_ORG") && !(userId)) {
       
       this.setState({
@@ -122,6 +124,9 @@ getFormErrorMessage = (meta) => {
         parentUserId : user.userId 
       });
     }else if(user && user.permissions.includes("EDIT_ORG") && userId){
+
+      
+
       this.setState({
         loading:true,
         showContent: false,
@@ -130,7 +135,6 @@ getFormErrorMessage = (meta) => {
       
       userService.findByUserId(userId).then(response => {
        
-        //alert(JSON.stringify(response.data.output));
         this.setState({
           userId:response.data.output.userId,
           name:response.data.output.name,
@@ -169,12 +173,12 @@ save(){
     parentUserId : user.userId 
   });
     
-
+  
     if(this.state.userId){
 
       authService.saveUser(JSON.stringify(this.state)).then(response => {
-    
-        if (response.data.user.userId) {
+        
+        if (response.data.obj.userId) {
           userService.saveUser(this.state).then(response => {
         
             if (response.data.output) {
@@ -196,15 +200,15 @@ save(){
       });
 
     }else{
-     // alert("create " + JSON.stringify(this.state));
-
+      
+      //alert("JSON" + JSON.stringify(this.state));
 
       authService.saveUser(JSON.stringify(this.state)).then(response => {
-    
-        if (response.data.user.userId) {
+        
+        if (response.data.obj.userId) {
 
           this.setState({
-            userId : response.data.user.userId
+            userId : response.data.obj.userId
           });
 
           
@@ -218,7 +222,10 @@ save(){
            // return null
            toast("Organization Not created:email or username is already exist");
           }
-        });
+        }).catch(error => {
+          toast("Organization Not created:email or username is already exist" +error);
+          //return null;
+        });;
 
         }else{
           toast("Organization Not created:email or username is already exist");
@@ -261,7 +268,7 @@ save(){
             sizeOfEmployees:this.state.sizeOfEmployees,
             organizationType:this.state.organizationType,
             tagLine:this.state.tagLine}
-          } 
+          }
           validate={this.validate} render={({ handleSubmit }) => (
   <form onSubmit={handleSubmit} className="p-fluid">
     <div class="grid">
