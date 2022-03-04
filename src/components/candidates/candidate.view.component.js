@@ -10,124 +10,195 @@ import { FileUpload } from 'primereact/fileupload';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import SideMenuComponent from '../menu/SideMenu';
+import authService from '../../services/auth.service';
+import userService from '../../services/user.service';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import authService from '../../services/auth.service';
+import { ToggleButton } from 'primereact/togglebutton';
+import { BlockUI } from 'primereact/blockui';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
  class CandidateViewComponent extends React.Component {
 
   constructor(props) {
-     
     super(props);
-   // this.onMenubarClick=this.onMenubarClick.bind(this);
-    this.onBtnClick=this.onBtnClick.bind(this);
-    this.state = {
-        showContent: false,
-        candidates: [
-            {
-                "name":"Bruce wayne",
-                "email":"bruce@intellogroup.com",
-                "contact":"033-088-999",
-                "dob":"02-04-1990",
-                "rev":'pi pi-user-plus',
-                "ac":'pi pi-user-plus'
-            },
-            {
-                "name":"Danieal ",
-                "email":"dip@intellogroup.com",
-                "contact":"033-056-876",
-                "dob":"01-05-1992",
-                "rev":'pi pi-user-plus',
-                "ac":'pi pi-user-plus'
-            },
-            {
-                "name":"Manoj Kumar",
-                "email":"mg@intellogroup.com",
-                "contact":"033-985-674",
-                "dob":"06-08-1983",
-                "rev":'pi pi-user-plus',
-                "ac":'pi pi-user-plus'
-            }
-        ]
-    };
-   
-     
-  }//end of constructor
-  componentDidMount() { // New Method added By Dipankar
 
+    
+    this.state = {
+      loading:false,
+      showContent:false,
+      users:[]
+      };
+
+
+  }//end
+
+
+  componentDidMount() { 
+    
     const user = authService.getCurrentUser();
+
+    this.state = {
+      loading:false,
+      showContent:false,
+      users:[]
+      };
+
 
     if (user && user.permissions.includes("VIEW_CANDIDATE")) {
       
       this.setState({
-        showContent: true,
-        candidates: [
-            {
-                "name":"Bruce wayne",
-                "email":"bruce@intellogroup.com",
-                "contact":"033-088-999",
-                "dob":"02-04-1990",
-                "rev":'pi pi-user-plus',
-                "ac":'pi pi-user-plus'
-            },
-            {
-                "name":"Danieal ",
-                "email":"dip@intellogroup.com",
-                "contact":"033-056-876",
-                "dob":"01-05-1992",
-                "rev":'pi pi-user-plus',
-                "ac":'pi pi-user-plus'
-            },
-            {
-                "name":"Manoj Kumar",
-                "email":"mg@intellogroup.com",
-                "contact":"033-985-674",
-                "dob":"06-08-1983",
-                "rev":'pi pi-user-plus',
-                "ac":'pi pi-user-plus'
-            }
-        ]
-    });
-    }else{
-      this.setState({
-        showContent: false,
-        candidates: []
-    });
+        loading:true,
+        showContent:true,
+        users:[]
+      });
+
+      userService.findCandidateByParentUserId(user.userId).then((response) => {
+        
+        this.setState({
+          showContent: true,
+          loading : false,
+          users: response.data.output
+        });
+
+        //alert(response);
+      },
+      error => {
+        this.setState({
+          showContent: false,
+          loading : false,
+          users: []
+        });
+      }
+    );
+
+
+
+
+
     }
 
     
   }
 
-onBtnClick(email){
-alert("candidate email = "+email);
-}
-  render() {
-    if(!this.state.showContent){
-        return (
-          <div>
-            <h3>Not Authorized to access this page</h3>
-          </div>
-          );
-      }else{     
-     return (
-      <div> 
-          <Panel header="View Candidate" >
-                <div className="card">
-                    <DataTable value={this.state.candidates} responsiveLayout="scroll">
-                        
-                        <Column field="name" header="Name"></Column>
-                        <Column field="email" header="Email"></Column>
-                        <Column field="contact" header="Contact"></Column>
-                        <Column field="dob" header="Date of Birth"></Column>
-                        <Column  body={<Button  className="p-button-raised p-button-rounded" icon="pi pi-user-edit" />} header="Review"></Column>
-                        <Column body={<Button  className="p-button-raised p-button-rounded" icon="pi pi-check" />} header="Is Active"></Column>
-                    </DataTable>
-                </div>
-            </Panel>
-     </div>
-    );
-     }
+
+
+  editRow(rowData) {
+ 
+    return (<div>
+      <Button
+        type="button" icon="pi pi-user-edit" value="Edit"
+        className="ui-button-success" onClick={() => this.editCandidate(rowData.userId)}
+      />
+      
+    </div>);
   }
+
+
+  editCandidate(userId){
+    //this.props.history.push("/createOrg");
+
+    userService.findByUserId(userId).then((response) => {
+      this.props.history.push({
+        pathname: "/basicInfoEntry",
+        state: response.data.output
+      });
+    });
+
+    
+    
+  }
+  
+  deleteRow(rowData) {
+ 
+    return (<div>
+      <ToggleButton checked={!rowData.isDeleted} 
+      onChange={(e) =>  this.onToggleClick(e,rowData)} 
+      onIcon="pi pi-check" offIcon="pi pi-times" />
+    </div>);
+  }
+  
+  onToggleClick(val,rowData){
+    this.setState({
+      loading : true
+    });
+  
+    userService.toggleUserStatusByEmail(rowData.email).then((response) => {
+      userService.findByParentUserIdAndUserType(authService.getCurrentUser().userId).then((resp) => {
+        
+        this.setState({
+          showContent: true,
+          loading : false,
+          users: resp.data.output
+        });
+
+        //alert(response);
+      },
+      error => {
+        this.setState({
+          showContent: false,
+          loading : false,
+          users: []
+        });
+      });
+    },
+    error => {
+        this.setState({
+          showContent: false,
+          loading : false,
+          users: []
+      });
+    });
+  
+    
+      
+   
+  }
+  
+
+render() {
+
+ 
+
+
+
+  if(this.state.loading){
+    return (
+      <div>
+        <center><ProgressSpinner/></center>
+        
+      </div>
+      );
+  }else if(!this.state.showContent){
+      return (
+        <div>
+          <h3>Not Authorized to access this page</h3>
+        </div>
+        );
+    }else{    
+      return (
+        <div> 
+            <Panel header="View User" >
+              <div className="card">
+                  <DataTable value={this.state.users} 
+                   responsiveLayout="scroll" paginator rows={2} rowsPerPageOptions={[2,4,6]}>
+                      
+                      <Column field="name" header="Name"></Column>
+                      <Column field="email" header="Email"></Column>
+                      <Column field="contactNumber" header="Contact"></Column>
+                      <Column  body={this.editRow.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_CANDIDATE")}></Column>
+                      <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_CANDIDATE")}></Column>
+                  </DataTable>
+              </div>
+          </Panel>
+        </div>
+  );
+   }
+}
+
+
+
+
 }
 
 export default withRouter(CandidateViewComponent);

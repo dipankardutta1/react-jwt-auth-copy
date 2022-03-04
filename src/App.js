@@ -56,6 +56,8 @@ class App extends Component {
 
   }
 
+ 
+
   componentDidMount() {
     const user = AuthService.getCurrentUser();
 
@@ -171,7 +173,7 @@ if(user.permissions.includes("VIEW_CANDIDATE")){
 if(user.permissions.includes("CREATE_CANDIDATE")){
   for(let i = 0; i < menus.length; i++) {
     if(menus[i].label == 'Manage Candidate'){
-      menus[i].items.push({label: 'Create Candidate', icon: 'pi pi-user-plus', url:'/basicInfoEntry'});
+      menus[i].items.push({label: 'Create Candidate', icon: 'pi pi-user-plus',url:'/basicInfoEntry',command:()=>{ this.clearHistory()}});
     }
   }
 }
@@ -243,8 +245,16 @@ if(user.permissions.includes("CREATE_CANDIDATE")){
   }
   onMenubarClick = (path) => {
     alert(path);
-    this.props.history.push(path);
+    this.props.history.push({
+      pathname:path,
+      state: null
+    });
 }
+
+clearHistory(){
+  window.history.replaceState(null, '')
+}
+
   render() {
     const start = <img alt="logo" src="showcase/images/logo.png" onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} height="40" className="mr-2"></img>;
     const end = <InputText placeholder="Search" type="text" />;

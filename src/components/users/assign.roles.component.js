@@ -15,6 +15,8 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import authService from '../../services/auth.service';
 import { ToggleButton } from 'primereact/togglebutton';
+import { BlockUI } from 'primereact/blockui';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
  class AssignRolesComponent extends React.Component {
 
@@ -199,7 +201,7 @@ onToggleClick(val,rowData){
     if(this.state.loading){
       return (
         <div>
-          <h3>Loading, Please Wait ....</h3>
+         <center><ProgressSpinner/></center>
         </div>
         );
     }else if(!this.state.showContent){

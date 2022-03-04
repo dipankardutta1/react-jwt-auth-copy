@@ -88,6 +88,15 @@ findByParentUserIdAndUserType(parentUserId){
 }
 
 
+findCandidateByParentUserId(parentUserId){
+  return axios({
+    url: API_URL + '/findCandidateByParentUserId/'+parentUserId,
+    method: 'get', 
+    headers: authHeader()
+  });
+}
+
+
 toggleUserStatusByEmail(email){
   //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
   //alert("in user service"+userDto);

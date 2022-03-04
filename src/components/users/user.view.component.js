@@ -15,6 +15,7 @@ import { Column } from 'primereact/column';
 import authService from '../../services/auth.service';
 import userService from '../../services/user.service';
 import { ToggleButton } from 'primereact/togglebutton';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
  class UserViewComponent extends React.Component {
 
@@ -165,7 +166,7 @@ import { ToggleButton } from 'primereact/togglebutton';
     if(this.state.loading){
       return (
         <div>
-          <h3>Loading, Please Wait ....</h3>
+          <center><ProgressSpinner/></center>
         </div>
         );
     }else if(!this.state.showContent){
@@ -180,7 +181,7 @@ import { ToggleButton } from 'primereact/togglebutton';
               <Panel header="View User" >
                 <div className="card">
                     <DataTable value={this.state.users} 
-                     responsiveLayout="scroll">
+                     responsiveLayout="scroll" paginator rows={2} rowsPerPageOptions={[2,4,6]}>
                         
                         <Column field="name" header="Name"></Column>
                         <Column field="email" header="Email"></Column>

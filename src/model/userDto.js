@@ -9,6 +9,10 @@ export class UserDto{
     location;
     checked;
     selectedRoles=[];
-
-    
+    parentUserId;
+       confirmEmail;
+       jobId;
+    jobType;
+    jobTypeValue;
+    //dob;
 }

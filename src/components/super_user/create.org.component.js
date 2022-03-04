@@ -16,6 +16,8 @@ import userService from '../../services/user.service';
 //import * as Yup from 'yup';
 import { Form, Field } from 'react-final-form';
 import { classNames } from 'primereact/utils';
+import { BlockUI } from 'primereact/blockui';
+import { ProgressSpinner } from 'primereact/progressspinner';
 // Importing toastify module
 import {toast} from 'react-toastify';
  
@@ -41,6 +43,7 @@ toast.configure()
   
    
    this.state = {
+    blockedPanel:false,
     loading:false,
     showContent: false,
     selectedRoles:['ROLE_ADMIN']
@@ -110,7 +113,7 @@ getFormErrorMessage = (meta) => {
 
 
   componentDidMount() { // New Method added By Dipankar
-
+    this.state.blockedPanel=false;
     const user = authService.getCurrentUser();
     let userId=localStorage.getItem('userId');
 
@@ -166,7 +169,12 @@ getFormErrorMessage = (meta) => {
 
 
 save(){
-
+  
+ 
+  this.setState({
+    blockedPanel:true
+  });
+  
   const user = authService.getCurrentUser();
 
   this.setState({
@@ -183,18 +191,30 @@ save(){
         
             if (response.data.output) {
               //alert(response.data.output.userId);
+              this.setState({
+                blockedPanel:false
+              });
               toast("Organization Updated");
               
             }else{
              // return null
+             this.setState({
+              blockedPanel:false
+            });
              toast("Organization Not Updated:email or name is already exist");
             }
         });
 
         }else{
+          this.setState({
+            blockedPanel:false
+          });
           toast("Organization Not Updated:email or name is already exist");
         }
       }).catch(error => {
+        this.setState({
+          blockedPanel:false
+        });
         toast("Organization Not Updated:email or name is already exist");
         //return null;
       });
@@ -216,21 +236,35 @@ save(){
         
           if (response.data.output) {
             //alert(response.data.output.userId);
-            
+            this.setState({
+              blockedPanel:false
+            });
             toast("Organization Created");
           }else{
            // return null
+           this.setState({
+            blockedPanel:false
+          });
            toast("Organization Not created:email or username is already exist");
           }
         }).catch(error => {
+          this.setState({
+            blockedPanel:false
+          });
           toast("Organization Not created:email or username is already exist" +error);
           //return null;
         });;
 
         }else{
+          this.setState({
+            blockedPanel:false
+          });
           toast("Organization Not created:email or username is already exist");
         }
       }).catch(error => {
+        this.setState({
+          blockedPanel:false
+        });
         toast("Organization Not created:email or username is already exist");
         //return null;
       });
@@ -249,7 +283,7 @@ save(){
     if(this.state.loading){
       return (
         <div>
-          <h3>Loading, Please Wait ....</h3>
+          <center><ProgressSpinner/></center>
         </div>
         );
     }else if(!this.state.showContent){
@@ -261,6 +295,9 @@ save(){
       }else{  
      return (
       <div>
+       
+        <BlockUI blocked={this.state.blockedPanel}  fullScreen>
+        
         <Panel header="Create Organization" >
         <Form onSubmit={this.onSubmit} initialValues={
           { name:this.state.name,email:this.state.email,location:this.state.location,
@@ -338,7 +375,7 @@ save(){
           {/*
         <InputText value={this.state.sizeOfEmployees} onChange={(e) => this.setState({sizeOfEmployees: e.target.value})} />
           */}
-
+ {this.state.blockedPanel && <ProgressSpinner/>}
         <Field name="sizeOfEmployees" render={({ input, meta }) => (
             <div className="field">
                 <span className="p-float-label">
@@ -410,7 +447,7 @@ save(){
     <div class="field grid">
         <div class="col-3 md:col-3 col-offset-3">
         <Button label="save" icon="pi pi-user" type="submit" className="p-button-raised p-button-rounded"/>
-        &nbsp; &nbsp; 
+        &nbsp;
         <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
        
         </div>
@@ -425,6 +462,7 @@ save(){
 </form>
 )}/>
 </Panel>
+</BlockUI>
       </div>
     );
 

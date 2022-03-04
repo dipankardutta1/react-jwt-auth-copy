@@ -16,6 +16,18 @@ import UserService from '../../services/user.service';
 import { Toast } from 'primereact/toast';
 import userService from '../../services/user.service';
 
+import { BlockUI } from 'primereact/blockui';
+import { ProgressSpinner } from 'primereact/progressspinner';
+// Importing toastify module
+import {toast} from 'react-toastify';
+ 
+// Import toastify css file
+import 'react-toastify/dist/ReactToastify.css';
+ 
+ // toast-configuration method,
+ // it is compulsory method.
+toast.configure()
+
  class UserCreateComponent extends React.Component {
 
   constructor(props) {
@@ -26,6 +38,7 @@ import userService from '../../services/user.service';
    //this.onRolesChange=this.onRolesChange.bind(this);
 
    this.state = {
+    blockedPanel:false,
     loading:false,
     showContent: false,
     selectedRoles:['ROLE_USER']
@@ -40,7 +53,7 @@ import userService from '../../services/user.service';
 
 
   componentDidMount() { // New Method added By Dipankar
-
+    this.state.blockedPanel=false;
     const user = authService.getCurrentUser();
     let userId=localStorage.getItem('userId');
 
@@ -160,7 +173,9 @@ import userService from '../../services/user.service';
       } */
     
       save(){
-
+        this.setState({
+          blockedPanel:true
+        });
         const user = authService.getCurrentUser();
       
         this.setState({
@@ -177,19 +192,35 @@ import userService from '../../services/user.service';
               
                   if (response.data.output) {
                     //alert(response.data.output.userId);
-                    
-                    alert("User Updated");
+                    this.setState({
+                      blockedPanel:false
+                    });
+                    toast("User Updated");
+      
+                    //alert("User Updated");
                   }else{
+                    this.setState({
+                      blockedPanel:false
+                    });
                    // return null
-                   alert("User Not created:email or username is already exist");
+                   toast("User Not created");
+                   //alert("User Not created:email or username is already exist");
                   }
               });
       
               }else{
-                alert("User Not Updated:email or username is already exist");
+                this.setState({
+                  blockedPanel:false
+                });
+                toast("User Not Updated");
+                //alert("User Not Updated:email or username is already exist");
               }
             }).catch(error => {
-              alert("User Not Updated:email or username is already exist");
+              this.setState({
+                blockedPanel:false
+              });
+              toast("User Not Updated");
+              //alert("User Not Updated:email or username is already exist");
               //return null;
             });
       
@@ -210,18 +241,31 @@ import userService from '../../services/user.service';
               
                 if (response.data.output) {
                   //alert(response.data.output.userId);
-                  
-                  alert("User Created");
+                  this.setState({
+                    blockedPanel:false
+                  });
+                  toast("User  created");
+                  //alert("User Created");
                 }else{
                  // return null
-                 alert("User Not created:email or username is already exist");
+                 this.setState({
+                  blockedPanel:false
+                });
+                 toast("User Not created:email or username is already exist");
+                // alert("User Not created:email or username is already exist");
                 }
               });
       
               }else{
+                this.setState({
+                  blockedPanel:false
+                });
                 alert("User Not created:email or username is already exist");
               }
             }).catch(error => {
+              this.setState({
+                blockedPanel:false
+              });
               alert("User Not created:email or username is already exist");
               //return null;
             });
@@ -248,7 +292,7 @@ reset(){
     if(this.state.loading){
       return (
         <div>
-          <h3>Loading, Please Wait ....</h3>
+            <center><ProgressSpinner/></center>
         </div>
         );
     }else if(!this.state.showContent){
@@ -261,7 +305,7 @@ reset(){
      return (
       <div>
       
-        
+      <BlockUI blocked={this.state.blockedPanel}  fullScreen>
         
         <div class="grid">
         
@@ -278,6 +322,8 @@ reset(){
                 
             </div>
         </div>
+        {this.state.blockedPanel && <ProgressSpinner/>}
+
         <div class="field grid">
             <label for="email" class="col-12 mb-2 md:col-2 md:mb-0">Email</label>
             <div class="col-12 md:col-10">
@@ -372,7 +418,7 @@ reset(){
         </div>
     </div>
            
-                    
+                    </BlockUI>
       </div>
     );
     }

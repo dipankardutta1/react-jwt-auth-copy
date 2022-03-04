@@ -28,21 +28,44 @@ import { Dropdown } from 'primereact/dropdown';
 }
            
 changeToBasic=()=>{
-  this.props.history.push("/basicInfoEntry");
+  
+ 
+  this.props.history.push({
+    pathname: "/basicInfoEntry",
+    state: this.props.candidateData
+  });
+
 }
 changeToEducation=()=>{
-  
-  this.props.history.push("/educationEntry");
+  //alert(JSON.stringify(this.props.candidateData));
+  this.props.history.push({
+    pathname: "/educationEntry",
+    state: this.props.candidateData
+  });
 }
 changeToExperience=()=>{
-  this.props.history.push("/experienceEntry");
+  
+  this.props.history.push({
+    pathname: "/experienceEntry",
+    state: this.props.candidateData
+  });
 }
 changeToDocument=()=>{
-  this.props.history.push("/documentUpload");
+  
+  this.props.history.push({
+    pathname: "/documentUpload",
+    state: this.props.candidateData
+  });
 }
 changeToReferral=()=>{
-  this.props.history.push("/referralEntry");
+ 
+  this.props.history.push({
+    pathname: "/referralEntry",
+    state: this.props.candidateData
+  });
 }
+
+
 
   render() {
         
@@ -53,24 +76,19 @@ changeToReferral=()=>{
     <Panel header="Candidate Information">
     <div class="grid">
     <div class="col-12 col-offset-1" >
-    <label for="fileUpload" >File Upload</label>
-     <FileUpload id="fileUpload" name="demo" url="./upload"  mode="basic" className="p-button-raised p-button-rounded" />
-    </div>
-    
-    <div class="col-12 col-offset-1" >
     <Button label="Basic information" icon="pi pi-check" onClick={this.changeToBasic} className="p-button-raised p-button-rounded"/>
     </div>
     <div class="col-12 col-offset-1">
-    <Button label="Education info" icon="pi pi-pencil" onClick={this.changeToEducation} className="p-button-raised p-button-rounded"/>
+    <Button label="Education info" disabled={!this.props.candidateData.userId}  icon="pi pi-pencil" onClick={this.changeToEducation} className="p-button-raised p-button-rounded"/>
     </div>
     <div class="col-12 col-offset-1">
-    <Button label="Experience info" icon="pi pi-id-card" onClick={this.changeToExperience} className="p-button-raised p-button-rounded"/>
+    <Button label="Experience info" disabled={!this.props.candidateData.userId} icon="pi pi-id-card" onClick={this.changeToExperience} className="p-button-raised p-button-rounded"/>
     </div>
     <div class="col-12 col-offset-1">
-    <Button label="Referral" icon="pi pi-user" onClick={this.changeToReferral} className="p-button-raised p-button-rounded"/>
+    <Button label="Referral" disabled={!this.props.candidateData.userId} icon="pi pi-user" onClick={this.changeToReferral} className="p-button-raised p-button-rounded"/>
     </div>
     <div class="col-12 col-offset-1">
-    <Button label="Document Upload" icon="pi pi-upload" onClick={this.changeToDocument} className="p-button-raised p-button-rounded"/>
+    <Button label="Document Upload" disabled={!this.props.candidateData.userId} icon="pi pi-upload" onClick={this.changeToDocument} className="p-button-raised p-button-rounded"/>
     </div>
     
     </div>
