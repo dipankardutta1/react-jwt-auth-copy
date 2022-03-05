@@ -1,7 +1,7 @@
 import axios from 'axios';
 import authHeader from './auth-header';
 import {UserDto} from '../model/userDto';
-const API_URL = "http://localhost:9000/resource/user";
+const API_URL = "http://localhost:9000/resource";
 
 class UserService {
   
@@ -11,15 +11,15 @@ class UserService {
   }
 
   getPublicContent() {
-    return axios.get(API_URL + '/resource/resource');
+    return axios.get(API_URL + '/user/resource/resource');
   }
 
   getUserBoard() {
-    return axios.get(API_URL + '/resource/securedUser', { headers: authHeader() });
+    return axios.get(API_URL + '/user/resource/securedUser', { headers: authHeader() });
   }
   
   getAdminBoard() {
-    return axios.get(API_URL + '/resource/securedAdmin', { headers: authHeader() });
+    return axios.get(API_URL + '/user/resource/securedAdmin', { headers: authHeader() });
   }
 
 // add By Dipankar
@@ -27,7 +27,7 @@ class UserService {
     //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
 
     return axios({
-      url: API_URL + '/findAll',
+      url: API_URL + '/user/findAll',
       method: 'get', 
       headers: authHeader() 
   })
@@ -45,7 +45,7 @@ class UserService {
     const user = JSON.parse(localStorage.getItem('user'));
     //alert("in user service"+userDto);
     return axios({
-      url: API_URL + '/saveUser',
+      url: API_URL + '/user/saveUser',
       method: 'post', 
       data: userDto,
       headers:  authHeader() 
@@ -58,7 +58,7 @@ findUserByEmail(email){
   const user = JSON.parse(localStorage.getItem('user'));
   //alert("in user service"+userDto);
   return axios({
-    url: API_URL + '/findByEmail/'+email,
+    url: API_URL + '/user/findByEmail/'+email,
     method: 'get', 
     headers: authHeader()
    
@@ -71,7 +71,7 @@ findUserByEmail(email){
 findByUserId(userId){
  
   return axios({
-    url: API_URL + '/findByUserId/'+userId,
+    url: API_URL + '/user/findByUserId/'+userId,
     method: 'get', 
     headers: authHeader()
    
@@ -81,7 +81,7 @@ findByUserId(userId){
 
 findByParentUserIdAndUserType(parentUserId){
   return axios({
-    url: API_URL + '/findByParentUserIdAndUserType/'+parentUserId,
+    url: API_URL + '/user/findByParentUserIdAndUserType/'+parentUserId,
     method: 'get', 
     headers: authHeader()
   });
@@ -90,9 +90,16 @@ findByParentUserIdAndUserType(parentUserId){
 
 findCandidateByParentUserId(parentUserId){
   return axios({
-    url: API_URL + '/findCandidateByParentUserId/'+parentUserId,
+    url: API_URL + '/user/findCandidateByParentUserId/'+parentUserId,
     method: 'get', 
     headers: authHeader()
+  });
+}
+
+findCandidateByLink(link){
+  return axios({
+    url: API_URL + '/findCandidateByLink/'+link,
+    method: 'get'
   });
 }
 
@@ -101,7 +108,7 @@ toggleUserStatusByEmail(email){
   //return  axios.get(API_URL + '/findAll', { headers: authHeader() });
   //alert("in user service"+userDto);
   return axios({
-    url: API_URL + '/activateOrInActivateUserByEmail/'+email,
+    url: API_URL + '/user/activateOrInActivateUserByEmail/'+email,
     method: 'delete', 
     headers: authHeader() 
    
@@ -110,7 +117,15 @@ toggleUserStatusByEmail(email){
 }
 
 
+saveCandidate(userDto){
+  
+  return axios({
+    url: API_URL + '/saveCandidate',
+    method: 'post', 
+    data: userDto
+});
 
+}
 
 
 }

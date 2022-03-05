@@ -217,7 +217,7 @@ class CandidateReferralComponent extends React.Component {
       });
       toast("Email or username is already exist");
       //return null;
-    });;
+    });
 
     
     

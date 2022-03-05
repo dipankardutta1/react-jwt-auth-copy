@@ -14,5 +14,6 @@ export class UserDto{
        jobId;
     jobType;
     jobTypeValue;
+    fileType;
     //dob;
 }
