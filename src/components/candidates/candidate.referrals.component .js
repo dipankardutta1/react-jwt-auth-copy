@@ -47,13 +47,23 @@ class CandidateReferralComponent extends React.Component {
   };
 
   onSubmit = (data, form) => {
+
+   
+    
     if(form){
       let user = authService.getCurrentUser();
+
+      let appStat = "";
+      if(data.saveType=="P"){
+        appStat = data.appStatus ? data.appStatus : "P";
+      }else if(data.saveType=="C"){
+        appStat = "C"
+      }
   
-      //alert(user.userId);
+      
        this.setState({
         parentUserId : user.userId,
-        appStatus:data.appStatus ? data.appStatus : "P",
+        appStatus:appStat,
         userId:data.userId,
         name:data.name,
         contactNumber:data.contactNumber,
@@ -78,10 +88,8 @@ class CandidateReferralComponent extends React.Component {
         blockedPanel:true
       
       },() => this.save());
-  
-    
+   
       
-      //this.save();
     }
     
     
@@ -217,7 +225,9 @@ class CandidateReferralComponent extends React.Component {
 }
 
 
-
+sendToCandidate(){
+  alert(JSON.stringify(this.state));
+}
 
 
   render() {
@@ -264,7 +274,7 @@ class CandidateReferralComponent extends React.Component {
             referalAddr:this.state.referalAddr
           }
           }
-          validate={this.validate} render={({ handleSubmit }) => (
+          validate={this.validate} render={({ handleSubmit ,form}) => (
     <form onSubmit={handleSubmit} className="p-fluid">
 
 
@@ -380,7 +390,13 @@ class CandidateReferralComponent extends React.Component {
     </div>
     <div class="field grid">
        <div class="col-3 md:col-3 col-offset-8">
-        <Button label="save & continue" type='submit' icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+        <Button label="save & continue" type='submit' onClick={() => {
+                form.change("saveType", "P");
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+        &nbsp; &nbsp; 
+        <Button label="Send To Candidate" type='submit' onClick={() => {
+                form.change("saveType", "C");
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded"/>
         &nbsp; &nbsp; 
         <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
       </div>
