@@ -9,6 +9,9 @@ import "./App.css";
 
 import menucontainer from "./menucontainer";
 import CandidateInfoComponent from './components/candidates/candidate.info.component';
+
+import userService from "./services/user.service";
+import authService from "./services/auth.service";
 class App extends Component {
 
   constructor(props) {
@@ -19,7 +22,24 @@ class App extends Component {
 
  
 
-  
+  componentDidMount() {
+    userService.getUserBoard().then(
+      response => {
+        
+      },
+      error => {
+        authService.logout();
+        this.props.history.push("/login");
+        window.location.reload();
+        this.setState({
+          content:
+            (error.response && error.response.data) ||
+            error.message ||
+            error.toString()
+        });
+      }
+    );
+  }
 
   
 

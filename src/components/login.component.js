@@ -4,6 +4,7 @@ import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 
 import AuthService from "../services/auth.service";
+import userService from "../services/user.service";
 
 const required = value => {
   if (!value) {
@@ -28,6 +29,25 @@ export default class Login extends Component {
       loading: false,
       message: ""
     };
+  }
+
+
+  componentDidMount() {
+    userService.getUserBoard().then(
+      response => {
+        this.props.history.push("/profile");
+        window.location.reload();
+      },
+      error => {
+       
+        this.setState({
+          content:
+            (error.response && error.response.data) ||
+            error.message ||
+            error.toString()
+        });
+      }
+    );
   }
 
   onChangeUsername(e) {

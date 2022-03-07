@@ -11,11 +11,11 @@ class UserService {
   }
 
   getPublicContent() {
-    return axios.get(API_URL + '/user/resource/resource');
+    return axios.get(API_URL + '/resource');
   }
 
   getUserBoard() {
-    return axios.get(API_URL + '/user/resource/securedUser', { headers: authHeader() });
+    return axios.get(API_URL + '/securedUser', { headers: authHeader() });
   }
   
   getAdminBoard() {

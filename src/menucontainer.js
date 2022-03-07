@@ -73,12 +73,12 @@ import EventBus from "./common/EventBus";
             icon: 'pi pi-fw pi-power-off',
             url:'/home'
         },
-        {
+        /*{
             label: 'Sign Up',
             icon: 'pi pi-fw pi-power-off',
             url:'/register'
            
-        },
+        },*/
         {
             label: 'Login',
             icon: 'pi pi-fw pi-power-off',
@@ -223,6 +223,40 @@ if(user.permissions.includes("CREATE_CANDIDATE")){
 }
 
 
+for(let i = 0; i < menus.length; i++) {
+
+  if(menus[i].label == 'Manage Organization'){
+    if(menus[i].items.length == 0){
+      menus.splice(i, 1);
+    }
+  }
+
+  if(menus[i].label == 'Manage User'){
+    if(menus[i].items.length == 0){
+      menus.splice(i, 1);
+    }
+  }
+
+  if(menus[i].label == 'Settings'){
+    if(menus[i].items.length == 0){
+      menus.splice(i, 1);
+    }
+  }
+
+  if(menus[i].label == 'Manage Candidate'){
+    if(menus[i].items.length == 0){
+      menus.splice(i, 1);
+    }
+  }
+
+
+}
+
+
+
+
+
+
         // logic for menu end
       this.setState({
         currentUser: user,
@@ -231,12 +265,7 @@ if(user.permissions.includes("CREATE_CANDIDATE")){
       });
     }else{
         let menus = this.state.items;
-        menus.push({
-            label: 'Sign Up',
-            icon: 'pi pi-fw pi-power-off',
-            url:'/register'
-           
-        },
+        menus.push(
         {
             label: 'Login',
             icon: 'pi pi-fw pi-power-off',

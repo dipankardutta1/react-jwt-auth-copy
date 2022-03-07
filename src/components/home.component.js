@@ -12,13 +12,18 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    UserService.getPublicContent().then(
+    UserService.getUserBoard().then(
       response => {
+
+       
         this.setState({
           content: response.data
         });
       },
       error => {
+       
+        this.props.history.push("/login");
+        window.location.reload();
         this.setState({
           content:
             (error.response && error.response.data) ||
