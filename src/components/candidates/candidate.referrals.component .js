@@ -58,6 +58,8 @@ class CandidateReferralComponent extends React.Component {
         appStat = data.appStatus ? data.appStatus : "P";
       }else if(data.saveType=="C"){
         appStat = "C"
+      }else if(data.saveType=="R"){
+        appStat = "R"
       }
   
       
@@ -398,6 +400,10 @@ sendToCandidate(){
                 form.change("saveType", "C");
               }} icon="pi pi-user" className="p-button-raised p-button-rounded"/>
         &nbsp; &nbsp; 
+        <Button label="Send To Reviewer" type='submit' onClick={() => {
+                form.change("saveType", "R");
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded" hidden={!(this.state.appStatus == 'F')} /> 
+         &nbsp; &nbsp;
         <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
       </div>
         

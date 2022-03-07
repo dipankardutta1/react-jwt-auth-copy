@@ -87,6 +87,19 @@ import {toast} from 'react-toastify';
     if(rowData.appStatus == 'C'){
       return (<div>
       </div>);
+    }else if(rowData.appStatus == 'R'){
+      if(authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE")){
+        return (<div>
+          <Button
+            type="button" icon="pi pi-user-edit" value="Edit"
+            className="ui-button-success" onClick={() => this.editCandidate(rowData.userId)}
+          />
+          
+        </div>);
+      }else{
+        return (<div>
+          </div>);
+      }
     }else{
       return (<div>
         <Button
