@@ -27,7 +27,8 @@ class CandidateDocumentUploadComponent extends React.Component {
 
     const user = authService.getCurrentUser();
 
-    if (user && user.permissions.includes("CREATE_CANDIDATE")) {
+    if (user && (user.permissions.includes("CREATE_CANDIDATE") || user.permissions.includes("EDIT_CANDIDATE")
+    || user.permissions.includes("REVIEW_CANDIDATE"))) {
       
       this.setState({
         showContent: true
