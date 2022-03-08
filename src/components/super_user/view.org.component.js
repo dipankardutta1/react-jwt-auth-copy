@@ -81,7 +81,14 @@ import { ProgressSpinner } from 'primereact/progressspinner';
     
   }
 
-
+displayLevel(rowData){
+  if(rowData.finalizedLevel == "1"){
+    return (<div>Save As Draft</div>);
+  }else{
+    return (<div>Ready for Use</div>);
+  }
+ 
+}
 
   editRow(rowData) {
  
@@ -176,7 +183,7 @@ render() {
                       
                       <Column field="name" header="Name"></Column>
                       <Column field="email" header="Email"></Column>
-                    
+                      <Column body={this.displayLevel.bind(this)}  header="Level"></Column>
                       <Column  body={this.editRow.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_ORG")}></Column>
                       <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_ORG")}></Column>
                   </DataTable>

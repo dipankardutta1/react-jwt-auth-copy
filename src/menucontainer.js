@@ -35,6 +35,7 @@ import assignRolesComponent from "./components/users/assign.roles.component";
 import CreateUserComponent from "./components/users/create-user.component";
 import AuthService from "./services/auth.service";
 import EventBus from "./common/EventBus";
+import ResetPwd from './components/resetPwd.component';
 
  class MenuContainerComponent extends React.Component {
 
@@ -304,6 +305,7 @@ for(let i = 0; i < menus.length; i++) {
         
             <Route exact path={["/", "/home"]} component={Home} />
             <Route exact path="/login" component={Login} />
+            <Route exact path="/resetPwd" component={ResetPwd} />
             <Route exact path="/register" component={Register} />
             <Route exact path="/profile" component={Profile} />
             <Route path="/user" component={BoardUser} />

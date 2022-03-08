@@ -32,7 +32,16 @@ class AuthService {
       .then(response => {
         
         if (response.data.access_token) {
-          localStorage.setItem("user", JSON.stringify(response.data));
+
+          if(response.data.finalizedLevel == "3"){
+            localStorage.setItem("user", JSON.stringify(response.data));
+            localStorage.setItem("userForReset", null);
+          }else{
+            localStorage.setItem("user", null);
+            localStorage.setItem("userForReset", JSON.stringify(response.data));
+          }
+
+          
 
         }
 
@@ -53,6 +62,18 @@ class AuthService {
     });
   }
 
+
+  resetPassword(userId, currentPwd, password,repassword) {
+    return axios.post(API_URL + "/api/auth/resetPassword", {
+      userId,
+      currentPwd,
+      password,
+      repassword
+    });
+  }
+
+
+
   getRoles() {
     return axios.post(API_URL + "/api/auth/getRoles");
     //return axios.get(RESOUCE_API_URL + '/api/auth/getRoles', { headers: authHeader() });
@@ -64,7 +85,11 @@ class AuthService {
     return axios.get(API_URL + "/api/auth/findRoleByUserName/"+userName);
   }
   getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user'));;
+    return JSON.parse(localStorage.getItem('user'));
+  }
+
+  getUserForRestPwd() {
+    return JSON.parse(localStorage.getItem('userForReset'));
   }
 
   saveUser(userDto){

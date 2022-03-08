@@ -71,8 +71,14 @@ if (!data.organizationType) {
 }
 if (!data.organizationUrl) {
   errors.organizationUrl = 'Organization Url is required.';
-}if (!data.sizeOfEmployees) {
+}
+
+if (!data.sizeOfEmployees) {
   errors.sizeOfEmployees = 'Size Of Employees  is required.';
+}else if(isNaN(data.sizeOfEmployees)){
+  errors.sizeOfEmployees = 'Size Of Employees  is not valid.';
+}else if(parseInt(data.sizeOfEmployees)>10000000){
+  errors.sizeOfEmployees = 'Size Of Employees  is not valid.';
 }
 if (!data.email) {
   errors.email = 'Email is required.';
@@ -87,18 +93,21 @@ else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
 onSubmit = (data, form) => {
   if(form){
     
-     this.setState({
-      name:data.name,
-      email:data.email,
-      organizationUrl:data.organizationUrl,
-     location:data.location,
-      sizeOfEmployees:data.sizeOfEmployees,
-      organizationType:data.organizationType,
-      tagLine:data.tagLine,
     
-    },() => this.save());
     
-    //this.save();
+      this.setState({
+        finalizedLevel:data.finalizedLevel ? data.finalizedLevel : "1", 
+        name:data.name,
+        email:data.email,
+        organizationUrl:data.organizationUrl,
+      location:data.location,
+        sizeOfEmployees:data.sizeOfEmployees,
+        organizationType:data.organizationType,
+        tagLine:data.tagLine,
+      
+      },() => this.save());
+   
+    
   }
   
   
@@ -141,6 +150,7 @@ getFormErrorMessage = (meta) => {
         this.setState({
           userId:response.data.output.userId,
           name:response.data.output.name,
+          finalizedLevel:response.data.output.finalizedLevel,
           email:response.data.output.email,
           organizationUrl:response.data.output.organizationUrl,
          location:response.data.output.location,
@@ -163,9 +173,6 @@ getFormErrorMessage = (meta) => {
 
     
   }
-
-
-
 
 
 save(){
@@ -300,13 +307,17 @@ save(){
         
         <Panel header="Create Organization" >
         <Form onSubmit={this.onSubmit} initialValues={
-          { name:this.state.name,email:this.state.email,location:this.state.location,
+          { userId:this.state.userId,
+            parentUserId:this.state.parentUserId,
+            finalizedLevel:this.state.finalizedLevel,
+            name:this.state.name,email:this.state.email,
+            location:this.state.location,
             organizationUrl:this.state.organizationUrl,
             sizeOfEmployees:this.state.sizeOfEmployees,
             organizationType:this.state.organizationType,
             tagLine:this.state.tagLine}
           }
-          validate={this.validate} render={({ handleSubmit }) => (
+          validate={this.validate} render={({ handleSubmit,form ,submitting, pristine}) => (
   <form onSubmit={handleSubmit} className="p-fluid">
     <div class="grid">
     <div class="col-11">
@@ -315,8 +326,12 @@ save(){
     <div class="field grid">
         <label for="organizationName" class="col-12 mb-2 md:col-2 md:mb-0">Organization Name</label>
         <div class="col-12 md:col-10">
+
+        
+
         <InputText  hidden value={this.state.userId} onChange={(e) => this.setState({userId: e.target.value})} />
         <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
+        <InputText  hidden value={this.state.finalizedLevel} onChange={(e) => this.setState({finalizedLevel: e.target.value})} />
         
         {/*
         <InputText value={this.state.name} onChange={(e) => this.setState({name: e.target.value})} />
@@ -446,9 +461,19 @@ save(){
     </div>
     <div class="field grid">
         <div class="col-3 md:col-3 col-offset-3">
-        <Button label="save" icon="pi pi-user" type="submit" className="p-button-raised p-button-rounded"/>
+        <Button label="save" icon="pi pi-user"  type="submit" className="p-button-raised p-button-rounded"/>
         &nbsp;
-        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+        <Button label="Finalize & Send Email" onClick={() => {
+                form.change("finalizedLevel", "2");
+              }} icon="pi pi-user" type="submit" className="p-button-raised p-button-rounded"
+              hidden={!(this.state.finalizedLevel == "1" && this.state.userId)}/>
+        &nbsp;
+        <Button label="Reset" type="button"
+        onClick={() => {
+          this.props.history.push("/createOrg");
+          window.location.reload();
+      }} 
+      icon="pi pi-user" className="p-button-raised p-button-rounded"/>
        
         </div>
     </div>

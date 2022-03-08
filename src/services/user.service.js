@@ -128,6 +128,17 @@ saveCandidate(userDto){
 }
 
 
+updateFinalizedLevel(userId,finalizedLevel){
+  
+  return axios({
+    url: API_URL + '/updateFinalizedLevel',
+    method: 'post', 
+    data: {userId,finalizedLevel}
+});
+
+}
+
+
 }
 
 export default new UserService();
