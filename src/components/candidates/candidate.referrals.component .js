@@ -16,7 +16,9 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import {toast} from 'react-toastify';
 import { Form, Field } from 'react-final-form';
 import { classNames } from 'primereact/utils';
- 
+import axios from 'axios';
+import authHeader from '../../services/auth-header';
+
 
 
 import SideMenuComponent from '../menu/SideMenu';
@@ -123,9 +125,11 @@ class CandidateReferralComponent extends React.Component {
 
         
 
-        this.setState({
+  
+      this.setState({
           showContent: true,
           blockedPanel:false,
+          
           appStatus:this.props.location.state ? this.props.location.state.appStatus : "",
           userId:this.props.location.state ? this.props.location.state.userId : "",
           name: this.props.location.state ? this.props.location.state.name : "",
@@ -410,8 +414,11 @@ sendToCandidate(){
         
     </div>
     
-
 </div>
+
+
+
+
 
 </form>
 )}/>

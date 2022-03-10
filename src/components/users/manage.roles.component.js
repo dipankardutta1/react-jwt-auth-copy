@@ -17,6 +17,9 @@ import authService from '../../services/auth.service';
 import { ToggleButton } from 'primereact/togglebutton';
 import { BlockUI } from 'primereact/blockui';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import {toast} from 'react-toastify';
+import { Form, Field } from 'react-final-form';
+import { classNames } from 'primereact/utils';
 
  class ManageRolesComponent extends React.Component {
 
@@ -26,7 +29,11 @@ import { ProgressSpinner } from 'primereact/progressspinner';
   
    this.save=this.save.bind(this);
    this.onPermissionsChange=this.onPermissionsChange.bind(this);
-   //this.onCityChange = this.onCityChange.bind(this);
+   this.onSubmit=this.onSubmit.bind(this);
+  
+   this.validate=this.validate.bind(this);
+   this.isFormFieldValid=this.isFormFieldValid.bind(this);
+   this.getFormErrorMessage=this.getFormErrorMessage.bind(this);
    this.state = {
     loading:false,
     showContent: false,
@@ -37,7 +44,31 @@ import { ProgressSpinner } from 'primereact/progressspinner';
     
   
   }//end
+  validate = (data) => {
+    let errors = {};
+    if (!data.roleName) {
+        errors.roleName = 'Role Name is required.';
+    }
+    return errors;
+};
 
+onSubmit = (data, form) => {
+  if(form){
+    
+      this.setState({
+        
+        roleId:data.roleId,
+        roleName:data.roleName
+      },() => this.save());
+  }
+  
+  
+};
+
+isFormFieldValid = (meta) => !!(meta.touched && meta.error);
+getFormErrorMessage = (meta) => {
+    return this.isFormFieldValid(meta) && <small className="p-error">{meta.error}</small>;
+};
 
 
   componentDidMount() { // New Method added By Dipankar
@@ -101,20 +132,20 @@ save(){
           this.setState({
             loading:false,
             showContent: true,
-            roleValues: resp.data.obj
-           
+            roleValues: resp.data.obj,
+            roleId:response.data.obj.roleId
           });
 
-          alert("Role Created/Updated");
+          toast("Role Created/Updated");
         });
 
 
 
       }else{
-        alert("Role Not Created");
+        toast("Error:Please try again!");
       }
     }).catch(error => {
-      alert("URole Not Created:Please try again!");
+      alert("Error:Please try again!");
       //return null;
     });
  
@@ -214,12 +245,29 @@ onToggleClick(val,rowData){
         
         <div class="col-11">
         <Panel header="Enter Details">
+
+        <Form onSubmit={this.onSubmit} initialValues={
+          { roleId:this.state.roleId,
+            roleName:this.state.roleName,
+           }
+          }
+          validate={this.validate} render={({ handleSubmit,form ,submitting, pristine}) => (
+          <form onSubmit={handleSubmit} className="p-fluid">
+
         <div class="card">
         <div class="field grid">
             <label for="roleName" class="col-12 mb-2 md:col-2 md:mb-0"> Role Name</label>
             <div class="col-12 md:col-10">
                 <InputText  hidden value={this.state.roleId} onChange={(e) => this.setState({roleId: e.target.value})} />
-                <InputText value={this.state.roleName} onChange={(e) => this.setState({roleName: e.target.value})} />
+                <Field name="roleName" render={({ input, meta }) => (
+                      <div className="field">
+                          <span className="p-float-label">
+                              <InputText id="roleName" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                              <label htmlFor="roleName" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Role Name</label>
+                          </span>
+                          {this.getFormErrorMessage(meta)}
+                      </div>
+                )} />
             </div>
         </div>
         
@@ -289,15 +337,21 @@ onToggleClick(val,rowData){
            </div>
         </div>
         <div class="field grid">
-            <div class="col-12 md:col-10 col-offset-6">
-            <Button label="submit" icon="pi pi-user" onClick={this.save} className="p-button-raised p-button-rounded"/>
+            <div class="col-3 md:col-3 col-offset-3">
+            <Button label="submit" icon="pi pi-user" type='submit' className="p-button-raised p-button-rounded"/>
             &nbsp; &nbsp; 
-            <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+            <Button label="Reset for New Entry" type="button"
+                onClick={() => {
+                this.props.history.push("/manageRoles");
+                window.location.reload();
+            }} icon="pi pi-user" className="p-button-raised p-button-rounded" />
            
             </div>
         </div>
         
     </div>
+    </form>
+    )}/>
     <div className="card">
                     <DataTable value={this.state.roleValues} responsiveLayout="scroll">
                         
