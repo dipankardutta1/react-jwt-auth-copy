@@ -161,6 +161,15 @@ import { ProgressSpinner } from 'primereact/progressspinner';
     localStorage.setItem("userSelected", userId);
   }
 
+  displayLevel(rowData){
+    if(rowData.finalizedLevel == "1"){
+      return (<div>Save As Draft</div>);
+    }else{
+      return (<div>Ready for Use</div>);
+    }
+   
+  }
+
   render() {
 
     if(this.state.loading){
@@ -185,7 +194,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
                         
                         <Column field="name" header="Name"></Column>
                         <Column field="email" header="Email"></Column>
-                      
+                        <Column body={this.displayLevel.bind(this)}  header="Level"></Column>
                         <Column  body={this.editRow.bind(this)}    header="Edit" hidden={!authService.getCurrentUser().permissions.includes("EDIT_USER")}></Column>
                         <Column body={this.assignRole.bind(this)} header="Assign Role" hidden={!authService.getCurrentUser().permissions.includes("MANAGE_ROLE")}></Column>
                         <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_USER")}></Column>

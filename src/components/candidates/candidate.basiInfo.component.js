@@ -37,6 +37,7 @@ toast.configure()
    this.getFormErrorMessage=this.getFormErrorMessage.bind(this);
    this.save=this.save.bind(this);
    this.state = {
+    selectedRoles:['ROLE_CANDIDATE'],
     showContent: false,
     blockedPanel:false,
     };
@@ -50,11 +51,31 @@ toast.configure()
     if (!data.name) {
         errors.name = 'Organization Name is required.';
     }
+
+    if (!data.contactNumber) {
+      errors.contactNumber = 'Contact Number is required.';
+    }else if(isNaN(data.contactNumber)){
+      errors.contactNumber = 'Contact Number  is not valid.';
+    }
     if (!data.email) {
       errors.email = 'Email is required.';
     }else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
       errors.email = 'Invalid email address. E.g. example@email.com';
     }
+
+    if (!data.confirmEmail) {
+      errors.confirmEmail = 'Confirm Email is required.';
+    }else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.confirmEmail)) {
+      errors.confirmEmail = 'Invalid email address. E.g. example@email.com';
+    }else if(data.email != data.confirmEmail){
+      errors.email = 'Email and Confirm Email are not same';
+      errors.confirmEmail = 'Email and Confirm Email are not same';
+    }
+
+    if (!data.dob) {
+      errors.dob = 'Date of Birth of Candidate is required.';
+    }
+    
 
     return errors;
 };
@@ -66,13 +87,17 @@ onSubmit = (data, form) => {
 
     //alert(user.userId);
      this.setState({
+      finalizedLevel:data.finalizedLevel ? data.finalizedLevel : "1", 
         parentUserId : user.userId,
         appStatus:data.appStatus ? data.appStatus : "P",
         userId:data.userId,
         name:data.name,
+        degreeStartDate:data.degreeStartDate,
+        degreeEndDate:data.degreeEndDate,
         contactNumber:data.contactNumber,
         email:data.email,
         confirmEmail:data.confirmEmail,
+        dob:data.dob,
         jobId:data.jobId,
         jobType:data.jobType,
         universityName:data.universityName,
@@ -89,6 +114,8 @@ onSubmit = (data, form) => {
         referalEmail:data.referalEmail,
         referalContact:data.referalContact,
         referalAddr:data.referalAddr,
+        jobStartDate:data.jobStartDate,
+        jobEndDate:data.jobEndDate,
         blockedPanel:true
     
     },() => this.save());
@@ -117,16 +144,18 @@ getFormErrorMessage = (meta) => {
 
     if (user && (user.permissions.includes("CREATE_CANDIDATE") || user.permissions.includes("EDIT_CANDIDATE")
     || user.permissions.includes("REVIEW_CANDIDATE"))) {
-      
+      alert(this.props.location.state ? this.props.location.state.dob : "");
       this.setState({
         showContent: true,
         blockedPanel:false,
         appStatus:this.props.location.state ? this.props.location.state.appStatus : "",
+        finalizedLevel:this.props.location.state ? this.props.location.state.finalizedLevel : "",
         userId:this.props.location.state ? this.props.location.state.userId : "",
         name: this.props.location.state ? this.props.location.state.name : "",
         contactNumber: this.props.location.state ? this.props.location.state.contactNumber : "",
         email: this.props.location.state ? this.props.location.state.email : "",
         confirmEmail: this.props.location.state ? this.props.location.state.confirmEmail : "",
+        dob:this.props.location.state ? this.props.location.state.dob : "",
         jobId: this.props.location.state ? this.props.location.state.jobId : "",
         jobType:this.props.location.state ? this.props.location.state.jobType : "",
         universityName:this.props.location.state ? this.props.location.state.universityName : "",
@@ -142,7 +171,11 @@ getFormErrorMessage = (meta) => {
           referalCompany:this.props.location.state ? this.props.location.state.referalCompany : "",
           referalEmail:this.props.location.state ? this.props.location.state.referalEmail : "",
           referalContact:this.props.location.state ? this.props.location.state.referalContact : "",
-          referalAddr:this.props.location.state ? this.props.location.state.referalAddr : ""
+          referalAddr:this.props.location.state ? this.props.location.state.referalAddr : "",
+          degreeStartDate:this.props.location.state ? this.props.location.state.degreeStartDate : "",
+        degreeEndDate:this.props.location.state ? this.props.location.state.degreeEndDate : "",
+        jobStartDate:this.props.location.state ? this.props.location.state.jobStartDate : "",
+        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : ""
       });
     }else{
       this.setState({
@@ -164,57 +197,86 @@ save(){
     //alert(JSON.stringify(this.state));
 
    
-    
-    userService.saveUser(this.state).then(response => {
-              
-        if (response.data.output) {
-          //alert(response.data.output.userId);
-          this.setState({ 
-            appStatus:response.data.output.appStatus,
-            userId:response.data.output.userId,
-            parentUserId:response.data.output.parentUserId,
-            name:response.data.output.name,
-            email:response.data.output.email,
-            confirmEmail:response.data.output.componentDidMount,
-            contactNumber:response.data.output.contactNumber,
-            jobId:response.data.output.jobId,
-            jobType:response.data.output.jobType,
-            universityName:response.data.output.universityName,
-            degree:response.data.output.degree,
-            subject:response.data.output.subject,
-            degreeComment:response.data.output.degreeComment,
-            organizationName:response.data.output.organizationName,
-            desiganationType:response.data.output.desiganationType,
-            reportingTo:response.data.output.reportingTo,
-            jobComment:response.data.output.jobComment,
-            referalType:response.data.output.referalType,
-            referalUserId:response.data.output.referalUserId,
-            referalCompany:response.data.output.referalCompany,
-            referalEmail:response.data.output.referalEmail,
-            referalContact:response.data.output.referalContact,
-            referalAddr:response.data.output.referalAddr,
-            blockedPanel:false
-      // dob:response.data.output.dob
+    authService.saveUser(JSON.stringify(this.state)).then(response => {
+
+      if (response.data.obj.userId) {
+
+        this.setState({
+          userId : response.data.obj.userId
         });
-       
-        toast("Candidate Created/Updated");
-         
-        }else{
-         // return null
-         this.setState({
+
+        userService.saveUser(this.state).then(response => {
+                  
+            if (response.data.output) {
+              //alert(response.data.output.userId);
+              this.setState({ 
+                appStatus:response.data.output.appStatus,
+                finalizedLevel:response.data.output.finalizedLevel,
+                userId:response.data.output.userId,
+                parentUserId:response.data.output.parentUserId,
+                name:response.data.output.name,
+                email:response.data.output.email,
+                confirmEmail:response.data.output.confirmEmail,
+                dob:response.data.output.dob,
+                contactNumber:response.data.output.contactNumber,
+                jobId:response.data.output.jobId,
+                jobType:response.data.output.jobType,
+                universityName:response.data.output.universityName,
+                degree:response.data.output.degree,
+                subject:response.data.output.subject,
+                degreeComment:response.data.output.degreeComment,
+                organizationName:response.data.output.organizationName,
+                desiganationType:response.data.output.desiganationType,
+                reportingTo:response.data.output.reportingTo,
+                jobComment:response.data.output.jobComment,
+                referalType:response.data.output.referalType,
+                referalUserId:response.data.output.referalUserId,
+                referalCompany:response.data.output.referalCompany,
+                referalEmail:response.data.output.referalEmail,
+                referalContact:response.data.output.referalContact,
+                referalAddr:response.data.output.referalAddr,
+                degreeStartDate:response.data.output.degreeStartDate,
+                degreeEndDate:response.data.output.degreeEndDate,
+                jobStartDate:response.data.output.jobStartDate,
+                jobEndDate:response.data.output.jobEndDate,
+                blockedPanel:false
+          // dob:response.data.output.dob
+            });
+          
+            toast("Candidate Created/Updated");
+            
+            }else{
+            // return null
+            this.setState({
+              blockedPanel:false
+            });
+            toast("Error:email  is already exist");
+            //alert("User Not created:email or username is already exist");
+            }
+        }).catch(error => {
+          this.setState({
+            blockedPanel:false
+          });
+          //alert(error)
+          toast("Error:Please try again!"+error);
+          //return null;
+        });
+      }else{
+        this.setState({
           blockedPanel:false
         });
-        toast("Candidate Not created:email  is already exist");
-         //alert("User Not created:email or username is already exist");
-        }
-    }).catch(error => {
-      this.setState({
-        blockedPanel:false
-      });
-      //alert(error)
-      toast("Email or username is already exist");
-      //return null;
-    });;
+        toast("Error:Please try again!");
+        //alert("User Not Updated:email or username is already exist");
+      }
+
+  }).catch(error => {
+    this.setState({
+      blockedPanel:false
+    });
+    //alert(error)
+    toast("Error:Please try again!");
+    //return null;
+  });;
 
     
     
@@ -244,11 +306,13 @@ save(){
 
     <Form onSubmit={this.onSubmit} initialValues={
           { appStatus:this.state.appStatus,
+            finalizedLevel:this.state.finalizedLevel,
             userId:this.state.userId,
             name:this.state.name,
             contactNumber:this.state.contactNumber,
             email:this.state.email,
             confirmEmail:this.state.confirmEmail,
+            dob:this.state.dob,
             jobId:this.state.jobId,
             jobType:this.state.jobType,
             universityName:this.state.universityName,
@@ -264,7 +328,11 @@ save(){
             referalCompany:this.state.referalCompany,
             referalEmail:this.state.referalEmail,
             referalContact:this.state.referalContact,
-            referalAddr:this.state.referalAddr
+            referalAddr:this.state.referalAddr,
+            degreeEndDate:this.state.degreeEndDate,
+            degreeStartDate:this.state.degreeStartDate,
+            jobStartDate:this.state.jobStartDate,
+            jobEndDate:this.state.jobEndDate
           }
           }
           validate={this.validate} render={({ handleSubmit }) => (
@@ -290,8 +358,14 @@ save(){
         <InputText  hidden value={this.state.referalEmail} onChange={(e) => this.setState({referalEmail: e.target.value})} />
         <InputText  hidden value={this.state.referalContact} onChange={(e) => this.setState({referalContact: e.target.value})} />
         <InputText  hidden value={this.state.referalAddr} onChange={(e) => this.setState({referalAddr: e.target.value})} />
-    
-
+        <InputText  hidden value={this.state.finalizedLevel} onChange={(e) => this.setState({finalizedLevel: e.target.value})} />
+        <InputText  hidden value={this.state.degreeEndDate} onChange={(e) => this.setState({degreeEndDate: e.target.value})} />
+        <InputText  hidden value={this.state.degreeStartDate} onChange={(e) => this.setState({degreeStartDate: e.target.value})} />
+        <InputText  hidden value={this.state.jobStartDate} onChange={(e) => this.setState({jobStartDate: e.target.value})} />
+        <InputText  hidden value={this.state.jobEndDate} onChange={(e) => this.setState({jobEndDate: e.target.value})} />
+        
+        
+        
 
         <Field name="name" render={({ input, meta }) => (
             <div className="field">
@@ -357,6 +431,17 @@ save(){
     </div><div class="field grid">
         <label for="dob" class="col-12 mb-2 md:col-2 md:mb-0">Date Of Birth</label>
         <div class="col-12 md:col-2">
+        <Field name="dob" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <Calendar id="dob" monthNavigator yearNavigator yearRange='1900:2300'
+                    maxDate={new Date()}  dateFormat="mm/dd/yy" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="dob" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>DOB</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+        )} />
+
         {/* <Calendar value={this.dob} dateFormat="mm/dd/yy" onChange={this.handleDob}></Calendar> */}
   </div>
     </div><div class="field grid">
@@ -392,7 +477,8 @@ save(){
     </div>
     <div class="field grid">
         <div class="col-3 md:col-3 col-offset-8">
-        <Button label="save & continue" icon="pi pi-user" type='submit' className="p-button-raised p-button-rounded"/>
+        <Button label="save & continue" icon="pi pi-user" type='submit' className="p-button-raised p-button-rounded"
+        disabled={this.state.appStatus == 'C'}/>
         &nbsp; &nbsp; 
         <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
        
