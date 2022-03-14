@@ -138,7 +138,7 @@ class CandidateDocumentUploadComponent extends React.Component {
   
       this.setState({
         showContent: true,
-        blockedPanel:false,
+        blockedPanel:true,
         appStatus:this.props.location.state ? this.props.location.state.appStatus : "",
         finalizedLevel:this.props.location.state ? this.props.location.state.finalizedLevel : "",
         userId:this.props.location.state ? this.props.location.state.userId : "",
@@ -166,12 +166,22 @@ class CandidateDocumentUploadComponent extends React.Component {
           degreeStartDate:this.props.location.state ? this.props.location.state.degreeStartDate : "",
         degreeEndDate:this.props.location.state ? this.props.location.state.degreeEndDate : "",
         jobStartDate:this.props.location.state ? this.props.location.state.jobStartDate : "",
-        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : ""
+        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : "",
+        files:  []
         });
 
-
-     
-
+        if(this.props.location.state){
+          userService.findDocumentsByUserId(this.props.location.state.userId).then(response => {
+            //alert(JSON.stringify(response.data.output));
+            this.setState({
+              blockedPanel:false,
+              files:  response.data.output
+            });
+           
+          });
+        }
+        
+        
       
       
     }else{
@@ -202,11 +212,15 @@ class CandidateDocumentUploadComponent extends React.Component {
       fd.append('userId',this.state.userId);
       fd.append('fileType',this.state.fileType);
       axios.post(API_URL + '/user/docUpload',fd,{headers: authHeader()}).then(response => {
-        toast("Document uploaded ! ");
+       
         this.fileUploaderRef.clear();
-        this.setState({
-          blockedPanel:false
+        userService.findDocumentsByUserId(this.state.userId).then(response => {
+          toast("Document uploaded ! ");
+          this.setState({
+            blockedPanel:false,
+            files:  response.data.output
           });
+        });
       },
       error=>{
         toast("Error: Please try again");
@@ -453,24 +467,21 @@ sendToCandidate(){
 
 </div>
 
-{/*
-<Panel header="View User" >
+
+<Panel header="View Files" >
               <div className="card">
-                  <DataTable value={this.state.users}
+                  <DataTable value={this.state.files}
                    responsiveLayout="scroll" paginator rows={2} rowsPerPageOptions={[2,4,6]}>
                       
-                      <Column field="name" header="Name"></Column>
-                      <Column field="email" header="Email"></Column>
-                      <Column field="contactNumber" header="Contact"></Column>
+                      <Column field="fileName" header="File Name"></Column>
+                      <Column field="fileType" header="File Type"></Column>
+                     
 
-                      <Column field="appStatus" header="Application Status" ></Column>
-
-                      <Column  body={this.editRow.bind(this)}    header="Edit" hidden={(!authService.getCurrentUser().permissions.includes("EDIT_CANDIDATE"))}></Column>
-                      <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_CANDIDATE")}></Column>
+                      
                   </DataTable>
               </div>
           </Panel>
-            */}
+            
 </form>
 )}/>
     </Panel>

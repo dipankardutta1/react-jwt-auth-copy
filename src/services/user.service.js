@@ -139,6 +139,17 @@ updateFinalizedLevel(userId,finalizedLevel){
 }
 
 
+
+findDocumentsByUserId(userId){
+  return axios({
+    url: API_URL + '/user/findDocumentsByUserId/'+userId,
+    method: 'get', 
+    headers: authHeader() 
+   
+  });
+}
+
+
 }
 
 export default new UserService();
