@@ -49,6 +49,39 @@ class CandidateDocumentUploadComponent extends React.Component {
   validate = (data) => {
     let errors = {};
 
+    
+
+    if(this.state.appStatus == 'R'  && 
+    authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") 
+    && !data.salaryPerMonth){
+      errors.salaryPerMonth = 'Salary Per Month is required.';
+    }
+
+    if(this.state.appStatus == 'R'  && 
+    authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") 
+    && !data.ctc){
+      errors.ctc = 'CTC is required.';
+    }
+
+    if(this.state.appStatus == 'R'  && 
+    authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") 
+    && !data.superviser){
+      errors.superviser = 'Superviser Name is required.';
+    }
+
+    if(this.state.appStatus == 'R'  && 
+    authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") 
+    && !data.reportee){
+      errors.reportee = 'Reportee Name is required.';
+    }
+
+    if(this.state.appStatus == 'R'  && 
+    authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") 
+    && !data.joiningDate){
+      errors.joiningDate = 'Joining Date is required.';
+    }
+
+    
     return errors;
   };
 
@@ -66,12 +99,18 @@ class CandidateDocumentUploadComponent extends React.Component {
         appStat = "C"
       }else if(data.saveType=="R"){
         appStat = "R"
+      }else if(data.saveType=="F"){
+        appStat = "F"
+      }else if(data.saveType=="Y"){
+        appStat = "Y"
+      }else if(data.saveType=="N"){
+        appStat = "N"
       }
   
       
        this.setState({
         finalizedLevel:data.finalizedLevel ? data.finalizedLevel : "1", 
-        parentUserId : user.userId,
+        parentUserId : data.parentUserId ?  data.parentUserId : user.userId,
         appStatus:appStat,
         userId:data.userId,
         name:data.name,
@@ -99,6 +138,16 @@ class CandidateDocumentUploadComponent extends React.Component {
         referalAddr:data.referalAddr,
         jobStartDate:data.jobStartDate,
         jobEndDate:data.jobEndDate,
+        address:data.address,
+        city:data.city,
+        state:data.state,
+        pin:data.pin,
+        currentUserId:user.userId,
+        salaryPerMonth:data.salaryPerMonth,
+        ctc:data.ctc,
+        superviser:data.superviser,
+        reportee:data.reportee,
+        joiningDate:data.joiningDate,
         blockedPanel:true
       
       },() => this.save());
@@ -131,7 +180,7 @@ class CandidateDocumentUploadComponent extends React.Component {
     const user = authService.getCurrentUser();
 
     if (user && (user.permissions.includes("CREATE_CANDIDATE") || user.permissions.includes("EDIT_CANDIDATE")
-    || user.permissions.includes("REVIEW_CANDIDATE"))) {
+    || user.permissions.includes("REVIEW_CANDIDATE") || user.permissions.includes("CANDIDATE_ENTRY") )) {
 
         
 
@@ -167,6 +216,11 @@ class CandidateDocumentUploadComponent extends React.Component {
         degreeEndDate:this.props.location.state ? this.props.location.state.degreeEndDate : "",
         jobStartDate:this.props.location.state ? this.props.location.state.jobStartDate : "",
         jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : "",
+        parentUserId:this.props.location.state ? this.props.location.state.parentUserId : "",
+        address:this.props.location.state ? this.props.location.state.address : "",
+        city:this.props.location.state ? this.props.location.state.city : "",
+        state:this.props.location.state ? this.props.location.state.state : "",
+        pin:this.props.location.state ? this.props.location.state.pin : "",
         files:  []
         });
 
@@ -283,12 +337,20 @@ class CandidateDocumentUploadComponent extends React.Component {
                 degreeEndDate:response.data.output.degreeEndDate,
                 jobStartDate:response.data.output.jobStartDate,
                 jobEndDate:response.data.output.jobEndDate,
+                address:response.data.output.address,
+                city:response.data.output.city,
+                state:response.data.output.state,
+                pin:response.data.output.pin,
                 blockedPanel:false
           // dob:response.data.output.dob
             });
           
             if(response.data.output.appStatus == "C"){
               toast("Email Sent to Candidate.");
+            }else if(response.data.output.appStatus == "Y"){
+              
+                toast("Offer Letter sent");
+              
             }else{
               toast("Candidate Created/Updated");
             }
@@ -385,7 +447,17 @@ sendToCandidate(){
             degreeEndDate:this.state.degreeEndDate,
             degreeStartDate:this.state.degreeStartDate,
             jobStartDate:this.state.jobStartDate,
-            jobEndDate:this.state.jobEndDate
+            jobEndDate:this.state.jobEndDate,
+            parentUserId:this.state.parentUserId,
+            address:this.state.address,
+            city:this.state.city,
+            state:this.state.state,
+            pin:this.state.pin,
+            salaryPerMonth:this.state.salaryPerMonth,
+            ctc:this.state.ctc,
+            superviser:this.state.superviser,
+            reportee:this.state.reportee,
+            joiningDate:this.state.joiningDate
           }
           }
           validate={this.validate} render={({ handleSubmit ,form}) => (
@@ -424,43 +496,137 @@ sendToCandidate(){
         <InputText  hidden value={this.state.referalType} onChange={(e) => this.setState({referalType: e.target.value})} />
         <InputText  hidden value={this.state.referalContact} onChange={(e) => this.setState({referalContact: e.target.value})} />
         <InputText  hidden value={this.state.referalAddr} onChange={(e) => this.setState({referalAddr: e.target.value})} />
-    
-<div class="field grid">
-{this.state.blockedPanel && <ProgressSpinner/>}
+        <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
+        <InputText  hidden value={this.state.address} onChange={(e) => this.setState({address: e.target.value})} />
+        <InputText  hidden value={this.state.city} onChange={(e) => this.setState({city: e.target.value})} />
+        <InputText  hidden value={this.state.state} onChange={(e) => this.setState({state: e.target.value})} />
+        <InputText  hidden value={this.state.pin} onChange={(e) => this.setState({pin: e.target.value})} />
+        
+        {this.state.blockedPanel && <ProgressSpinner/>}
+<div class="field grid" hidden={(this.state.appStatus != 'C' && authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")) || this.state.appStatus == 'Y' || this.state.appStatus == 'N'}>
+
     <label for="file" class="col-12 mb-2 md:col-2 md:mb-0">File </label>
        <div class="col-12 md:col-10">
        <FileUpload name="demo"  maxFileSize={1000000}  
        mode="basic"
        customUpload 
        ref={(el) => this.fileUploaderRef = el}
-       uploadHandler={this.myUploader} />
+       uploadHandler={this.myUploader} 
+       />
        
       </div>
   </div>
-  <div class="field grid">
+  <div class="field grid" hidden={(this.state.appStatus != 'C' && authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")) || this.state.appStatus == 'Y' || this.state.appStatus == 'N'}>
     <label for="fileType" class="col-12 mb-2 md:col-2 md:mb-0">File Type </label>
        <div class="col-12 md:col-10">
       
        <Dropdown id="fileType" options={this.state.fileTyps}  value={this.state.fileType} onChange={(e) => this.setState({fileType:e.value})}
        placeholder="Select File type"/>
     </div>
-      </div>    
-      <div class="field grid">
+  </div>
+
+
+  <div class="field grid"  hidden={!(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE"))}>
+        <label for="salaryPerMonth" class="col-12 mb-2 md:col-2 md:mb-0">Salary Per Month</label>
+        <div class="col-12 md:col-10">
+            
+            <Field name="salaryPerMonth" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="salaryPerMonth" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="salaryPerMonth" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Salary Per Month</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+        </div>
+    </div>
+    <div class="field grid"  hidden={!(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE"))}>
+        <label for="ctc" class="col-12 mb-2 md:col-2 md:mb-0">CTC</label>
+        <div class="col-12 md:col-10">
+            
+            <Field name="ctc" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="ctc" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="ctc" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>CTC</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+        </div>
+    </div>
+    <div class="field grid"  hidden={!(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE"))}>
+        <label for="superviser" class="col-12 mb-2 md:col-2 md:mb-0">Superviser Name</label>
+        <div class="col-12 md:col-10">
+            
+            <Field name="superviser" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="superviser" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="superviser" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Superviser Name</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+        </div>
+    </div>
+    <div class="field grid"  hidden={!(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE"))}>
+        <label for="reportee" class="col-12 mb-2 md:col-2 md:mb-0">Reportee Name</label>
+        <div class="col-12 md:col-10">
+            
+            <Field name="reportee" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="reportee" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="reportee" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Reportee Name</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+        </div>
+    </div>
+    <div class="field grid" hidden={!(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE"))}>
+        <label for="joiningDate" class="col-12 mb-2 md:col-2 md:mb-0">Joining Date</label>
+        <div class="col-12 md:col-6">
+        <Field name="joiningDate" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <Calendar id="joiningDate" showIcon={true} monthNavigator yearNavigator yearRange='2022:2300'
+                    minDate={new Date()}  dateFormat="mm/dd/yy" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="joiningDate" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Joining Date</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+        )} />
+        </div>
+  </div>
+
+  <div class="field grid">
        <div class="col-3 md:col-3 col-offset-8">
-        {/*<Button label="save & continue" type='submit' onClick={() => {
-                form.change("saveType", "P");
-              }} icon="pi pi-user" className="p-button-raised p-button-rounded"/>
-            &nbsp; &nbsp; */}
         <Button label="Send To Candidate" type='submit' onClick={() => {
                 form.change("saveType", "C")
                 form.change("finalizedLevel", "2")
-              }} icon="pi pi-user" className="p-button-raised p-button-rounded" disabled={this.state.appStatus == 'C'}/>
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded" hidden={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY") || this.state.appStatus == 'C' || this.state.appStatus == 'R' || this.state.appStatus == 'N' || this.state.appStatus == 'Y' }/>
         &nbsp; &nbsp; 
         <Button label="Send To Reviewer" type='submit' onClick={() => {
                 form.change("saveType", "R");
-              }} icon="pi pi-user" className="p-button-raised p-button-rounded" hidden={!(this.state.appStatus == 'F')} /> 
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded" hidden={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY") || !(this.state.appStatus == 'F')} /> 
          &nbsp; &nbsp;
-        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+         <Button label="Send For Review" type='submit' onClick={() => {
+                form.change("saveType", "F");
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded" disabled={ !authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")} hidden={this.state.appStatus != 'C'} /> 
+         &nbsp; &nbsp;
+         <Button label="Generate & send Offer Letter" type='submit' onClick={() => {
+                form.change("saveType", "Y");
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded"  hidden={!(authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") && this.state.appStatus == 'R')} /> 
+         &nbsp; &nbsp;
+         <Button label="Reject" type='submit' onClick={() => {
+                form.change("saveType", "N");
+              }} icon="pi pi-user" className="p-button-raised p-button-rounded"  hidden={!(authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") && this.state.appStatus == 'R')} />
+        &nbsp; &nbsp; 
+        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"
+        hidden={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")}/>
       </div>
         
     </div>

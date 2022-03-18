@@ -49,7 +49,7 @@ toast.configure()
   validate = (data) => {
     let errors = {};
     if (!data.name) {
-        errors.name = 'Organization Name is required.';
+        errors.name = 'Name is required.';
     }
 
     if (!data.contactNumber) {
@@ -57,11 +57,37 @@ toast.configure()
     }else if(isNaN(data.contactNumber)){
       errors.contactNumber = 'Contact Number  is not valid.';
     }
+
+    if (!data.address) {
+      errors.address = 'Address is required.';
+    }
+
+    if (!data.city) {
+      errors.city = 'City is required.';
+    }
+    if (!data.state) {
+      errors.state = 'State is required.';
+    }
+
+    if (!data.pin) {
+      errors.pin = 'Zip code/Pin is required.';
+    }
+
     if (!data.email) {
       errors.email = 'Email is required.';
     }else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
       errors.email = 'Invalid email address. E.g. example@email.com';
     }
+    
+    if(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") && !data.jobId){
+      errors.jobId = 'JobId is required.';
+    }
+
+    if(this.state.appStatus == 'R' && authService.getCurrentUser().permissions.includes("REVIEW_CANDIDATE") && !data.jobType){
+      errors.jobType = 'JobId is required.';
+    }
+
+    
 
     if (!data.confirmEmail) {
       errors.confirmEmail = 'Confirm Email is required.';
@@ -88,7 +114,7 @@ onSubmit = (data, form) => {
     //alert(user.userId);
      this.setState({
       finalizedLevel:data.finalizedLevel ? data.finalizedLevel : "1", 
-        parentUserId : user.userId,
+        parentUserId : data.parentUserId ?  data.parentUserId : user.userId,
         appStatus:data.appStatus ? data.appStatus : "P",
         userId:data.userId,
         name:data.name,
@@ -116,11 +142,16 @@ onSubmit = (data, form) => {
         referalAddr:data.referalAddr,
         jobStartDate:data.jobStartDate,
         jobEndDate:data.jobEndDate,
+        address:data.address,
+        city:data.city,
+        state:data.state,
+        pin:data.pin,
+        currentUserId:user.userId,
         blockedPanel:true
     
     },() => this.save());
 
-  
+    
     
     //this.save();
   }
@@ -143,8 +174,8 @@ getFormErrorMessage = (meta) => {
     const user = authService.getCurrentUser();
 
     if (user && (user.permissions.includes("CREATE_CANDIDATE") || user.permissions.includes("EDIT_CANDIDATE")
-    || user.permissions.includes("REVIEW_CANDIDATE"))) {
-      alert(this.props.location.state ? this.props.location.state.dob : "");
+    || user.permissions.includes("REVIEW_CANDIDATE")  || user.permissions.includes("CANDIDATE_ENTRY") )) {
+      //alert(this.props.location.state ? this.props.location.state.dob : "");
       this.setState({
         showContent: true,
         blockedPanel:false,
@@ -155,7 +186,7 @@ getFormErrorMessage = (meta) => {
         contactNumber: this.props.location.state ? this.props.location.state.contactNumber : "",
         email: this.props.location.state ? this.props.location.state.email : "",
         confirmEmail: this.props.location.state ? this.props.location.state.confirmEmail : "",
-        dob:this.props.location.state ? this.props.location.state.dob : "",
+        dob:this.props.location.state ? new Date(this.props.location.state.dob) : "",
         jobId: this.props.location.state ? this.props.location.state.jobId : "",
         jobType:this.props.location.state ? this.props.location.state.jobType : "",
         universityName:this.props.location.state ? this.props.location.state.universityName : "",
@@ -175,7 +206,12 @@ getFormErrorMessage = (meta) => {
           degreeStartDate:this.props.location.state ? this.props.location.state.degreeStartDate : "",
         degreeEndDate:this.props.location.state ? this.props.location.state.degreeEndDate : "",
         jobStartDate:this.props.location.state ? this.props.location.state.jobStartDate : "",
-        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : ""
+        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : "",
+        parentUserId:this.props.location.state ? this.props.location.state.parentUserId : "",
+        address:this.props.location.state ? this.props.location.state.address : "",
+        city:this.props.location.state ? this.props.location.state.city : "",
+        state:this.props.location.state ? this.props.location.state.state : "",
+        pin:this.props.location.state ? this.props.location.state.pin : ""
       });
     }else{
       this.setState({
@@ -217,7 +253,7 @@ save(){
                 name:response.data.output.name,
                 email:response.data.output.email,
                 confirmEmail:response.data.output.confirmEmail,
-                dob:response.data.output.dob,
+                dob:new Date(response.data.output.dob),
                 contactNumber:response.data.output.contactNumber,
                 jobId:response.data.output.jobId,
                 jobType:response.data.output.jobType,
@@ -239,6 +275,10 @@ save(){
                 degreeEndDate:response.data.output.degreeEndDate,
                 jobStartDate:response.data.output.jobStartDate,
                 jobEndDate:response.data.output.jobEndDate,
+                address:response.data.output.address,
+                city:response.data.output.city,
+                state:response.data.output.state,
+                pin:response.data.output.pin,
                 blockedPanel:false
           // dob:response.data.output.dob
             });
@@ -332,7 +372,12 @@ save(){
             degreeEndDate:this.state.degreeEndDate,
             degreeStartDate:this.state.degreeStartDate,
             jobStartDate:this.state.jobStartDate,
-            jobEndDate:this.state.jobEndDate
+            jobEndDate:this.state.jobEndDate,
+            parentUserId:this.state.parentUserId,
+            address:this.state.address,
+            city:this.state.city,
+            state:this.state.state,
+            pin:this.state.pin
           }
           }
           validate={this.validate} render={({ handleSubmit }) => (
@@ -363,6 +408,7 @@ save(){
         <InputText  hidden value={this.state.degreeStartDate} onChange={(e) => this.setState({degreeStartDate: e.target.value})} />
         <InputText  hidden value={this.state.jobStartDate} onChange={(e) => this.setState({jobStartDate: e.target.value})} />
         <InputText  hidden value={this.state.jobEndDate} onChange={(e) => this.setState({jobEndDate: e.target.value})} />
+        <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
         
         
         
@@ -397,13 +443,77 @@ save(){
      </div>
     </div>
     <div class="field grid">
+        <label for="address" class="col-12 mb-2 md:col-2 md:mb-0">Address</label>
+        <div class="col-12 md:col-10">
+        
+        <Field name="address" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="address" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="address" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Address</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+
+     </div>
+    </div>
+    <div class="field grid">
+        <label for="city" class="col-12 mb-2 md:col-2 md:mb-0">City</label>
+        <div class="col-12 md:col-10">
+        
+        <Field name="city" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="city" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="city" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>City</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+
+     </div>
+    </div>
+    <div class="field grid">
+        <label for="state" class="col-12 mb-2 md:col-2 md:mb-0">State</label>
+        <div class="col-12 md:col-10">
+        
+        <Field name="state" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="state" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="state" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>State</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+
+     </div>
+    </div>
+    <div class="field grid">
+        <label for="pin" class="col-12 mb-2 md:col-2 md:mb-0">Zip Code/Pin</label>
+        <div class="col-12 md:col-10">
+        
+        <Field name="pin" render={({ input, meta }) => (
+            <div className="field">
+                <span className="p-float-label">
+                    <InputText id="pin" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <label htmlFor="pin" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Zip Code/Pin</label>
+                </span>
+                {this.getFormErrorMessage(meta)}
+            </div>
+          )} />
+
+     </div>
+    </div>
+    <div class="field grid">
         <label for="email" class="col-12 mb-2 md:col-2 md:mb-0">Email</label>
         <div class="col-12 md:col-10">
         
-        <Field name="email" render={({ input, meta }) => (
+        <Field name="email"  render={({ input, meta }) => (
             <div className="field">
                 <span className="p-float-label">
-                    <InputText id="email" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <InputText id="email" readOnly={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")} {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
                     <label htmlFor="email" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Email</label>
                 </span>
                 {this.getFormErrorMessage(meta)}
@@ -419,7 +529,7 @@ save(){
         <Field name="confirmEmail" render={({ input, meta }) => (
             <div className="field">
                 <span className="p-float-label">
-                    <InputText id="confirmEmail" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
+                    <InputText id="confirmEmail" readOnly={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")} {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
                     <label htmlFor="confirmEmail" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>Confirm Email</label>
                 </span>
                 {this.getFormErrorMessage(meta)}
@@ -430,11 +540,11 @@ save(){
      {this.state.blockedPanel && <ProgressSpinner/>}
     </div><div class="field grid">
         <label for="dob" class="col-12 mb-2 md:col-2 md:mb-0">Date Of Birth</label>
-        <div class="col-12 md:col-2">
+        <div class="col-12 md:col-6">
         <Field name="dob" render={({ input, meta }) => (
             <div className="field">
                 <span className="p-float-label">
-                    <Calendar id="dob" monthNavigator yearNavigator yearRange='1900:2300'
+                    <Calendar id="dob" showIcon={true} monthNavigator yearNavigator yearRange='1900:2300'
                     maxDate={new Date()}  dateFormat="mm/dd/yy" {...input} autoFocus className={classNames({ 'p-invalid': this.isFormFieldValid(meta) })} />
                     <label htmlFor="dob" className={classNames({ 'p-error': this.isFormFieldValid(meta) })}>DOB</label>
                 </span>
@@ -476,11 +586,13 @@ save(){
         </div>
     </div>
     <div class="field grid">
-        <div class="col-3 md:col-3 col-offset-8">
+        <div class="col-3 md:col-3 col-offset-8" hidden={this.state.appStatus == 'Y'  || this.state.appStatus == 'N' }>
         <Button label="save & continue" icon="pi pi-user" type='submit' className="p-button-raised p-button-rounded"
-        disabled={this.state.appStatus == 'C'}/>
+        disabled={this.state.appStatus == 'C' && !authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")}
+        hidden={this.state.appStatus != 'C' && authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")}/>
         &nbsp; &nbsp; 
-        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"
+        hidden={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")}/>
        
         </div>
     </div>

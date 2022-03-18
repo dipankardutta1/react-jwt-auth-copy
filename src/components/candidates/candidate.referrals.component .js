@@ -56,7 +56,7 @@ class CandidateReferralComponent extends React.Component {
       //alert(user.userId);
        this.setState({
         finalizedLevel:data.finalizedLevel ? data.finalizedLevel : "1", 
-        parentUserId : user.userId,
+        parentUserId : data.parentUserId ?  data.parentUserId : user.userId,
         appStatus:data.appStatus ? data.appStatus : "P",
         userId:data.userId,
         name:data.name,
@@ -84,6 +84,11 @@ class CandidateReferralComponent extends React.Component {
         referalAddr:data.referalAddr,
         jobStartDate:data.jobStartDate,
         jobEndDate:data.jobEndDate,
+        address:data.address,
+        city:data.city,
+        state:data.state,
+        pin:data.pin,
+        currentUserId:user.userId,
         blockedPanel:true
       
       },() => this.save());
@@ -118,7 +123,7 @@ class CandidateReferralComponent extends React.Component {
     const user = authService.getCurrentUser();
 
     if (user && (user.permissions.includes("CREATE_CANDIDATE") || user.permissions.includes("EDIT_CANDIDATE")
-    || user.permissions.includes("REVIEW_CANDIDATE"))) {
+    || user.permissions.includes("REVIEW_CANDIDATE")  || user.permissions.includes("CANDIDATE_ENTRY") )) {
 
         
 
@@ -153,7 +158,12 @@ class CandidateReferralComponent extends React.Component {
           degreeStartDate:this.props.location.state ? this.props.location.state.degreeStartDate : "",
         degreeEndDate:this.props.location.state ? this.props.location.state.degreeEndDate : "",
         jobStartDate:this.props.location.state ? this.props.location.state.jobStartDate : "",
-        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : ""
+        jobEndDate:this.props.location.state ? this.props.location.state.jobEndDate : "",
+        parentUserId:this.props.location.state ? this.props.location.state.parentUserId : "",
+        address:this.props.location.state ? this.props.location.state.address : "",
+        city:this.props.location.state ? this.props.location.state.city : "",
+          state:this.props.location.state ? this.props.location.state.state : "",
+          pin:this.props.location.state ? this.props.location.state.pin : ""
         });
 
 
@@ -220,6 +230,10 @@ class CandidateReferralComponent extends React.Component {
                 degreeEndDate:response.data.output.degreeEndDate,
                 jobStartDate:response.data.output.jobStartDate,
                 jobEndDate:response.data.output.jobEndDate,
+                address:response.data.output.address,
+                city:response.data.output.city,
+                state:response.data.output.state,
+                pin:response.data.output.pin,
                 blockedPanel:false
           // dob:response.data.output.dob
             });
@@ -317,7 +331,12 @@ sendToCandidate(){
             degreeEndDate:this.state.degreeEndDate,
             degreeStartDate:this.state.degreeStartDate,
             jobStartDate:this.state.jobStartDate,
-            jobEndDate:this.state.jobEndDate
+            jobEndDate:this.state.jobEndDate,
+            parentUserId:this.state.parentUserId,
+            address:this.state.address,
+            city:this.state.city,
+            state:this.state.state,
+            pin:this.state.pin
           }
           }
           validate={this.validate} render={({ handleSubmit ,form}) => (
@@ -352,6 +371,11 @@ sendToCandidate(){
         <InputText  hidden value={this.state.degreeStartDate} onChange={(e) => this.setState({degreeStartDate: e.target.value})} />
         <InputText  hidden value={this.state.jobStartDate} onChange={(e) => this.setState({jobStartDate: e.target.value})} />
         <InputText  hidden value={this.state.jobEndDate} onChange={(e) => this.setState({jobEndDate: e.target.value})} />
+        <InputText  hidden value={this.state.parentUserId} onChange={(e) => this.setState({parentUserId: e.target.value})} />
+        <InputText  hidden value={this.state.address} onChange={(e) => this.setState({address: e.target.value})} />
+        <InputText  hidden value={this.state.city} onChange={(e) => this.setState({city: e.target.value})} />
+        <InputText  hidden value={this.state.state} onChange={(e) => this.setState({state: e.target.value})} />
+        <InputText  hidden value={this.state.pin} onChange={(e) => this.setState({pin: e.target.value})} />
         
       
         <Field name="referalType" render={({ input, meta }) => (
@@ -441,11 +465,13 @@ sendToCandidate(){
         </div>
     </div>
     <div class="field grid">
-       <div class="col-3 md:col-3 col-offset-8">
+       <div class="col-3 md:col-3 col-offset-8" hidden={this.state.appStatus == 'Y'  || this.state.appStatus == 'N' }>
        <Button label="save & continue" type='submit' icon="pi pi-user" className="p-button-raised p-button-rounded"
-       disabled={this.state.appStatus == 'C'}/>
+       disabled={(this.state.appStatus == 'C' && !authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY"))}
+       hidden={this.state.appStatus != 'C' && authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")}/>
         &nbsp; &nbsp; 
-        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"/>
+        <Button label="Reset" icon="pi pi-user" className="p-button-raised p-button-rounded"
+        hidden={authService.getCurrentUser().permissions.includes("CANDIDATE_ENTRY")}/>
       </div>
         
     </div>

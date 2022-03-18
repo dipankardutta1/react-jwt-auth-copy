@@ -36,6 +36,7 @@ import CreateUserComponent from "./components/users/create-user.component";
 import AuthService from "./services/auth.service";
 import EventBus from "./common/EventBus";
 import ResetPwd from './components/resetPwd.component';
+import userService from './services/user.service';
 
  class MenuContainerComponent extends React.Component {
 
@@ -103,6 +104,18 @@ clearHistory(){
 }
 
 
+openProfile(){
+
+  const user = AuthService.getCurrentUser();
+
+  userService.findByUserId(user.userId).then((response) => {
+    this.props.history.push({
+      pathname: "/basicInfoEntry",
+      state: response.data.output
+    });
+  });
+}
+
   componentDidMount() {
     const user = AuthService.getCurrentUser();
 
@@ -111,6 +124,16 @@ clearHistory(){
         // logic for Menu 
         let menus = this.state.items;
         
+        if(user.permissions.includes("CANDIDATE_ENTRY")){
+          menus.push(
+          {
+            label: 'My Profile',
+            icon: 'pi pi-search-plus',
+            //url:'/basicInfoEntry',
+            command:()=>{ this.openProfile()}
+          }
+          );
+        }
         
           menus.push(
           {

@@ -150,6 +150,16 @@ findDocumentsByUserId(userId){
 }
 
 
+generateOfferLetter(userId){
+  return axios({
+    url: API_URL + '/user/generateOfferLetter/'+userId,
+    method: 'get', 
+    headers: authHeader() 
+   
+  });
+}
+
+
 }
 
 export default new UserService();

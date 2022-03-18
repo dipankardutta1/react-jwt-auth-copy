@@ -175,6 +175,25 @@ import {toast} from 'react-toastify';
       
    
   }
+
+  displayLevel(rowData){
+    if(rowData.appStatus == "P"){
+      return (<div>Pending</div>);
+    }else if(rowData.appStatus == "C"){
+      return (<div>Pending with Candidate</div>);
+    }else if(rowData.appStatus == "F"){
+      return (<div>Forwarded</div>);
+    }else if(rowData.appStatus == "R"){
+      return (<div>Review Pending</div>);
+    }else if(rowData.appStatus == "Y"){
+      return (<div>Candidate Selected</div>);
+    }else if(rowData.appStatus == "N"){
+      return (<div>Candidate Rejected</div>);
+    }else{
+      return (<div>NA</div>);
+    }
+   
+  }
   
 
 render() {
@@ -208,7 +227,8 @@ render() {
                       <Column field="email" header="Email"></Column>
                       <Column field="contactNumber" header="Contact"></Column>
 
-                      <Column field="appStatus" header="Application Status" ></Column>
+                      <Column  body={this.displayLevel.bind(this)} header="Application Status" ></Column>
+
 
                       <Column  body={this.editRow.bind(this)}    header="Edit" hidden={(!authService.getCurrentUser().permissions.includes("EDIT_CANDIDATE"))}></Column>
                       <Column body={this.deleteRow.bind(this)} header="Is Active" hidden={!authService.getCurrentUser().permissions.includes("DELETE_CANDIDATE")}></Column>
