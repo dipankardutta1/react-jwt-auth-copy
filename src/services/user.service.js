@@ -149,7 +149,14 @@ findDocumentsByUserId(userId){
   });
 }
 
-
+downloadDocumentsByUserIdAndDocId(userId,docId){
+  return axios({
+    url: API_URL + '/user/download/'+userId+"/"+docId,
+    method: 'get', 
+    headers: authHeader() 
+   
+  });
+}
 generateOfferLetter(userId){
   return axios({
     url: API_URL + '/user/generateOfferLetter/'+userId,

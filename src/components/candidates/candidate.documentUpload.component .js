@@ -394,7 +394,37 @@ class CandidateDocumentUploadComponent extends React.Component {
 
 }
 
+editRow(rowData) {
+  return (<div>
+    <Button
+      type="button" icon="pi pi-download" value="Edit"
+      className="ui-button-success" onClick={() => this.downloadFile(rowData)}
+    />
+    
+  </div>);
 
+}
+downloadFile(rowData){
+
+
+userService.downloadDocumentsByUserIdAndDocId(this.state.userId,rowData.fileName).then(response => {
+
+  var a = document.createElement("a"); //Create <a>
+  
+  a.href = "data:"+response.data.fileType+";base64,"+response.data.content ; // Base64 Goes here
+  a.download = response.data.fileName; //File name Here
+  a.click();
+   
+},
+error=>{
+toast("Error: Please try again");
+
+}
+);
+
+
+
+}
 sendToCandidate(){
   alert(JSON.stringify(this.state));
 }
@@ -641,7 +671,7 @@ sendToCandidate(){
                       
                       <Column field="fileName" header="File Name"></Column>
                       <Column field="fileType" header="File Type"></Column>
-                     
+                      <Column  body={this.editRow.bind(this)} header="Download"></Column>
 
                       
                   </DataTable>
